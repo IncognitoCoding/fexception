@@ -48,7 +48,7 @@ exec_args = { <br />
 &emsp;'expected_result': '5', <br />
 &emsp;'returned_result': '2', <br />
 &emsp;'suggested_resolution': 'Check the input source.', <br />
-&emsp;'custom_type': MySampleException,
+&emsp;'custom_type': MySampleException, <br />
 } <br />
 raise FCustomException(exec_args) <br />
 
