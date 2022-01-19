@@ -6,6 +6,15 @@ venv/
 # Project Content
 .vscode/
 
+# Package Files
+*.egg
+*.eggs/
+.installed.cfg
+*.egg-info
+
+# Distribution and Build Files
+dist/*
+
 # Temp Files
 __pycache__/
 .cache/*
