@@ -1,0 +1,13 @@
+# Virtual Environments
+venv/
+.venv*/
+.conda*/
+
+# Project Content
+.vscode/
+
+# Temp Files
+__pycache__/
+.cache/*
+.*.swp
+.DS_Store
