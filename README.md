@@ -34,5 +34,12 @@ Installation
 
 From PyPI
 -------------------
-You can find fexception on PyPI. Install fexception to your Python environment. Once installed, add fexception as a module and select the formatted
-exception option from the import. Note: You can use * to import all formatted exception options.
+You can find fexception on PyPI. https://pypi.org/project/fexception/ 
+Install fexception to your Python environment. 
+
+Usage
+=====
+Once installed, add fexception as a module and select the formatted
+exception option from the import.
+
+Note: You can use * to import all formatted exception options.
