@@ -5,7 +5,7 @@ fexception is designed to provide cleaner useable exceptions. The "f" in fexcept
 
 The purpose of fexception is not to replace or remove traceback or exceptions but to act as a companion to increase valuable messages.
 
-fexception allows anyone to create helper/utility/common modules that raise exceptions to get ignored when returning an exception. This helps provide clean messaging and traceback troubleshooting.
+fexception allows anyone to create helper/utility/common modules that raise exceptions to get ignored when returning an exception traceback information and add the caller details into the message.
 
 Description
 ===========
