@@ -3,6 +3,10 @@ fexception
 
 fexception is designed to provide cleaner useable exceptions. The "f" in fexception represents formatted.
 
+The purpose of fexception is not to replace or remove traceback or exceptions but to act as a companion to increase valuable messages.
+
+fexception allows anyone to create helper/utility/common modules that raise exceptions to get ignored when returning an exception traceback information and add the caller details into the message.
+
 Description
 ===========
 
@@ -13,13 +17,10 @@ multiple traceback return options.
 fexception's operates like built-in Python exceptions. You raise the exception when needed, and the exception will get formatted. 
 All raised exceptions will source and trackback from the original raised location. fexception supports nested formatted messages.
 
-fexception offers three traceback options that can enable/disable with boolean attributes. 
-  1. One level of traceback.
-  2. Full traceback.
-  3. No traceback information.
-
 fexception offers five message keys to format the exception to your liking. Three keys provide string or list values to format multiple lines cleanly.
-Each exception message must be in dictionary format. Use the table below to set the formatted exception message. 
+The exception message must be in dictionary format. Use the table below to set the formatted exception message. 
+
+### message_args Usage Table:
 
 | Key           			        | Type          | Optional | Value  									                                                            |
 | --------------------------- |:-------------:|:--------:|------------------------------------------------------------------------------------- |
@@ -31,26 +32,97 @@ Each exception message must be in dictionary format. Use the table below to set 
 
 fexception includes a custom exception class that is not part of the built-in Python exceptions. This exception is called FCustomException. This exception is unique because it can add custom exceptions to the formatted message. When the exception is returned, the exception will return as your custom exception class. This class is the only class that has a possibility of six keys. The required key for this custom class is called custom_type.
 
-Examples
+Optional Features
+=================
+fexception offers two custom argument options to adjust the traceback output. These two options are optional and are not required to create formatted exceptions.
+
+tb_limit: <br />
+  - The first option allows the traceback to be limited by the index point. If you want no traceback, you can set it to 0, or if you wish to see the first two lines, you can select the value to 2. The default value is None, which prints all available traceback detail.
+  - The tb_limit can be set with a number value.
+
+
+caller_override: <br />
+  - The second option allows you complete control over the returned formatted message and traceback. This is useful if you choose to create sub-modules to perform validation checks, but you do not want those sub-modules to show up in the traceback details.
+  - This option is less common but powerful when you have nested helper modules. 
+  - The adjusted traceback detail will return to the console when raised, but the back-end traceback will still know the original calls to all modules. Any inspection of the trackback directly will show all calls.
+  - A tb_limit value needs to be set when enabling caller_override. Set the value to None for all output or a number to limit the returned traceback lines.
+
+The caller_overide option must be in dictionary format. Use the table below to set option. 
+
+### caller_override Usage Table:
+
+| Key           			        | Type          | Optional | Value  									                                                            |
+| --------------------------- |:-------------:|:--------:|------------------------------------------------------------------------------------- |
+| module                      | str           | no		   | The override module.			                                                            |
+| name                        | str           | no		   | The override name.    		                                                            |
+| line                        | int           | no		   | The override line number.                                                            |
+| tb_remove                   | str           | no		   | The traceback module name that needs to be removed.			                            |
+
+Usage Examples
 ============
 ### Example1:
-exec_args = { <br />
-&emsp;'main_message': 'Incorrect value was sent.', <br />
-&emsp;'expected_result': '5', <br />
-&emsp;'returned_result': '2', <br />
-&emsp;'suggested_resolution': 'Check the input source.', <br />
-} <br />
-raise FValueError(exec_args) <br />
+Normal exception raise.
+
+    exec_args = {
+      'main_message': 'Incorrect value was sent.',
+      'expected_result': '5',
+      'returned_result': '2',
+      'suggested_resolution': 'Check the input source.',
+    }
+    raise FValueError(exec_args)
 
 ### Example2:
-exec_args = { <br />
-&emsp;'main_message': 'Incorrect value was sent.', <br />
-&emsp;'expected_result': '5', <br />
-&emsp;'returned_result': '2', <br />
-&emsp;'suggested_resolution': 'Check the input source.', <br />
-&emsp;'custom_type': MySampleException, <br />
-} <br />
-raise FCustomException(exec_args) <br />
+Exception raise with a custom exception class.<br />
+
+    exec_args = {
+      'main_message': 'Incorrect value was sent.',
+      'expected_result': '5',
+      'returned_result': '2',
+      'suggested_resolution': 'Check the input source.',
+      'custom_type': MySampleException,
+    }
+    raise FCustomException(exec_args)
+
+### Example3:
+Exception raise with adjusted traceback.
+
+    exec_args = {
+      'main_message': 'Incorrect value was sent.',
+      'expected_result': '5',
+      'returned_result': '2',
+      'suggested_resolution': 'Check the input source.',
+    }
+    caller_override = {
+      'module': 'my_module',
+      'name': 'get_type,
+      'line': 90,
+      'tb_remove': 'helpers',
+    }
+    raise FValueError(exec_args, None, caller_override)
+
+Formatted Exception Message Example
+===================================
+
+    FValueError: A problem occurred while checking the variable type.
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    -----------------------------------------------------------------Additional Information---------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    Expected Result:
+      - A <class 'str'> was sent.
+
+    Returned Result:
+      - An <class 'int'>
+
+    Suggested Resolution:
+      - Check input variable.
+
+    Trace Details:
+      - Exception: FValueError
+      - Module: utility
+      - Name: type_validate
+      - Line: 40
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Installation
 ============
