@@ -18,7 +18,7 @@ fexception's operates like built-in Python exceptions. You raise the exception w
 All raised exceptions will source and trackback from the original raised location. fexception supports nested formatted messages.
 
 fexception offers five message keys to format the exception to your liking. Three keys provide string or list values to format multiple lines cleanly.
-Each exception message must be in dictionary format. Use the table below to set the formatted exception message. 
+The exception message must be in dictionary format. Use the table below to set the formatted exception message. 
 
 ### message_args Usage Table:
 
@@ -34,7 +34,7 @@ fexception includes a custom exception class that is not part of the built-in Py
 
 Optional Features
 =================
-fexception offers two custom argument options to adjust the traceback output. 
+fexception offers two custom argument options to adjust the traceback output. These two options are optional and are not required to create formatted exceptions.
 
 tb_limit: <br />
   - The first option allows the traceback to be limited by the index point. If you want no traceback, you can set it to 0, or if you wish to see the first two lines, you can select the value to 2. The default value is None, which prints all available traceback detail.
@@ -45,6 +45,9 @@ caller_override: <br />
   - The second option allows you complete control over the returned formatted message and traceback. This is useful if you choose to create sub-modules to perform validation checks, but you do not want those sub-modules to show up in the traceback details.
   - This option is less common but powerful when you have nested helper modules. 
   - The adjusted traceback detail will return to the console when raised, but the back-end traceback will still know the original calls to all modules. Any inspection of the trackback directly will show all calls.
+  - A tb_limit value needs to be set when enabling caller_override. Set the value to None for all output or a number to limit the returned traceback lines.
+
+The caller_overide option must be in dictionary format. Use the table below to set option. 
 
 ### caller_override Usage Table:
 
