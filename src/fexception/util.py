@@ -1,7 +1,7 @@
 import inspect
 from types import FrameType
 from inspect import currentframe
-from typing import cast, Union
+from typing import cast, Union, Optional
 
 
 def get_line_number() -> int:
@@ -34,6 +34,8 @@ class KeyCheck():
     """
     An advanced dictionary key checker that offers two different check options.
 
+    Raises an exception if the key validation is unsuccessful. No return output.
+
     Options:\\
     \tcontains_keys(): Checks if some required keys exist in the dictionary.\\
     \tall_keys(): Checks if all required keys exist in the dictionary.
@@ -54,40 +56,70 @@ class KeyCheck():
         self._caller_name = caller_name
         self._caller_line = caller_line
 
-    def contains_keys(self, required_keys: Union[str, list]):
+    def contains_keys(self, required_keys: Union[str, list], reverse: Optional[bool] = False) -> None:
         """
         Checks if some required keys exist in the dictionary.
 
-        Reverse Tip:\\
-        \tReverses the key check error output, so the expected result and returned results\\
-        \tare flipped to allow value checks on expected dynamic keys.
-
         Args:
-            required_keys (Union[str, list])): The required key(s) that should match. Can be a single str or list of keys.
-            reverse (bool, optional): Reverses the key check error output, so the expected result and returned results are flipped.
+            required_keys (Union[str, list])): The required key(s) that should match.\\
+            \t\t\t\t\t\t   Can be a single str or list of keys.
+            reverse (bool, optional): Reverses the key check error output, so the\\
+            \t\t\t\t       expected result and returned results are flipped.\\
+            \t\t\t\t       Defaults to False.
+
+        Raises:
+            AttributeError: The input keys have inconsistent value and requirement keys.
+            AttributeError: The expected key list contains duplicate keys. All keys must be unique.
+            InvalidKeyError: The dictionary key (\'{no_matching_key}\') does not exist in the expected required key(s).
+            InvalidKeyError: The dictionary key (\'{no_matching_key}\') does not match any expected match option key(s).
         """
         self._required_keys = required_keys
         self._all_key_check = False
+        self._reverse = reverse
         self._key_validation()
 
-    def all_keys(self, required_keys: Union[str, list]):
+    def all_keys(self, required_keys: Union[str, list], reverse: Optional[bool] = False) -> None:
         """
         Checks if all required keys exist in the dictionary
 
         Args:
-            required_keys (Union[str, list])): The required key(s) that should match. Can be a single str or list of keys.
+            required_keys (Union[str, list])): The required key(s) that should match.\\
+            \t\t\t\t\t\t   Can be a single str or list of keys.
+            reverse (bool, optional): Reverses the key check error output, so the\\
+            \t\t\t\t       expected result and returned results are flipped.\\
+            \t\t\t\t       Defaults to False.
+
+        Raises:
+            AttributeError: The input keys have inconsistent value and requirement keys.
+            AttributeError: The expected key list contains duplicate keys. All keys must be unique.
+            InvalidKeyError: The dictionary key (\'{no_matching_key}\') does not exist in the expected required key(s).
+            InvalidKeyError: The dictionary key (\'{no_matching_key}\') does not match any expected match option key(s).
         """
         self._required_keys = required_keys
         self._all_key_check = True
+        self._reverse = reverse
         self._key_validation()
 
     def _key_validation(self) -> None:
+        """
+        Performs the key validation.
+        """
+        # Loops through to find any keys that do not match.
+        dict_keys = list(self._values.keys())
+
+        # Reverses for checks and validation.
+        if self._reverse:
+            expected_keys = dict_keys
+            required_keys = self._required_keys
+        else:
+            expected_keys = self._required_keys
+            required_keys = dict_keys
+
         # Checks for 1:1 input when using the all_keys option.
         if self._all_key_check:
-            dict_keys: list = list(self._values.keys())
             mismatched_input: bool
-            if isinstance(self._required_keys, list):
-                if len(self._required_keys) != len(dict_keys):
+            if isinstance(required_keys, list):
+                if len(expected_keys) != len(required_keys):
                     mismatched_input = True
                 else:
                     mismatched_input = False
@@ -99,11 +131,12 @@ class KeyCheck():
 
             if mismatched_input is True:
                 error_message = (
-                    f'A dictionary key validation could not be performed because of inconsistent value and requirement key input.\n'
+                    f'The input keys have inconsistent value and requirement keys.\n'
                     + (('-' * 150) + '\n') + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n') + (('-' * 150) + '\n')
-                    + 'Returned Result:\n'
-                    f'  - self._values = {dict_keys}\n'
-                    f'  - self._required_keys = {self._required_keys}\n\n'
+                    + 'Expected Result:\n'
+                    f'  - Required Key(s) = {expected_keys}\n\n'
+                    'Returned Result:\n'
+                    f'  - Failed Key(s) = {required_keys}\n\n'
                     + f'Trace Details:\n'
                     f'  - Exception: AttributeError\n'
                     f'  - Module: {self._caller_name}\n'
@@ -112,15 +145,17 @@ class KeyCheck():
                     + (('-' * 150) + '\n') * 2
                 )
                 raise AttributeError(error_message)
+        else:
+            mismatched_input = False
 
         # Checks for duplicate values.
-        if isinstance(self._required_keys, list):
-            if len(self._required_keys) != len(set(self._required_keys)):
+        if isinstance(required_keys, list):
+            if len(required_keys) != len(set(required_keys)):
                 error_message = (
                     f'The required key list contains duplicate keys. All keys must be unique.\n'
                     + (('-' * 150) + '\n') + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n') + (('-' * 150) + '\n')
                     + 'Returned Result:\n'
-                    f'  - self._required_keys = {self._required_keys}\n\n'
+                    f'  - Required Keys = {required_keys}\n\n'
                     + f'Trace Details:\n'
                     f'  - Exception: AttributeError\n'
                     f'  - Module: {self._caller_module}\n'
@@ -130,14 +165,28 @@ class KeyCheck():
                 )
                 raise AttributeError(error_message)
 
-        # Loops through to find any keys that do not match.
-        dict_keys = list(self._values.keys())
+        if isinstance(expected_keys, list):
+            if len(expected_keys) != len(set(expected_keys)):
+                error_message = (
+                    f'The expected key list contains duplicate keys. All keys must be unique.\n'
+                    + (('-' * 150) + '\n') + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n') + (('-' * 150) + '\n')
+                    + 'Returned Result:\n'
+                    f'  - Required Keys = {expected_keys}\n\n'
+                    + f'Trace Details:\n'
+                    f'  - Exception: AttributeError\n'
+                    f'  - Module: {self._caller_module}\n'
+                    f'  - Name: {self._caller_name}\n'
+                    f'  - Line: {self._caller_line}\n'
+                    + (('-' * 150) + '\n') * 2
+                )
+                raise AttributeError(error_message)
+
         # Sets the keys in reverse order so the no-match is the last entry checked
         # but the first no-match in the list of keys.
         sorted_dict_keys = sorted(dict_keys, reverse=True)
 
-        if isinstance(self._required_keys, list):
-            for required_key in self._required_keys:
+        if isinstance(required_keys, list):
+            for required_key in required_keys:
                 # Checks if the validation requires all the required keys
                 # to match all sorted_dict_keys or the required keys to match
                 # some of the sorted_dict_keys.
@@ -160,7 +209,7 @@ class KeyCheck():
                     break
         else:
             # Variable name swap for easier loop reading.
-            required_key: str = self._required_keys
+            required_key: str = required_keys
             for dict_key in sorted_dict_keys:
                 if required_key == dict_key:
                     # Checks for exact match.
@@ -171,27 +220,15 @@ class KeyCheck():
 
         # Checks if a no matching key exists, to output the error
         if no_matching_key:
-            # Checks if the no matching key is in the required keys.
-            # If the no matching key exists in the required keys the expected result and returned result will
-            # be flipped, so the output is represented cleanly.
-            # This can occur when using the reverse check.
-            #   Example: A sample dictionary set is used to compare required keys.
-            if no_matching_key in self._required_keys:
-                expected_key = dict_keys
-                returned_key = self._required_keys
-            else:
-                expected_key = self._required_keys
-                returned_key = dict_keys
-
             # Formats the output based on the check option.
             if self._all_key_check:
                 main_message = f'The dictionary key (\'{no_matching_key}\') does not exist in the expected required key(s).\n'
-                expected_result = f'  - Required Key(s) = {expected_key}'
-                returned_result = f'  - Failed Key(s) = {returned_key}'
+                expected_result = f'  - Required Key(s) = {expected_keys}'
+                returned_result = f'  - Failed Key(s) = {required_keys}'
             else:
                 main_message = f'The dictionary key (\'{no_matching_key}\') does not match any expected match option key(s).\n'
-                expected_result = f'  - Match Option Key(s) = {expected_key}'
-                returned_result = f'  - Failed Key(s) = {returned_key}'
+                expected_result = f'  - Match Option Key(s) = {expected_keys}'
+                returned_result = f'  - Failed Key(s) = {required_keys}'
 
             error_message = (
                 f'{main_message}'

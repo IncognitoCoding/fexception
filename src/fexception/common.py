@@ -64,6 +64,23 @@ class ProcessedMessageArgs:
 
 
 @dataclass
+class ProcessedOverrideArgs:
+    """
+    Processed override info to format the exception message.
+
+    Args:
+        module (str): The caller module.\\
+        name (str): The caller function or method name.\\
+        line (int): The caller raised exception line number\\
+    """
+    __slots__ = "module", "name", "line"
+
+    module: str
+    name: str
+    line: int
+
+
+@dataclass
 class ExceptionArgs:
     """
     Exception args to construct the formatted exception message.
@@ -71,19 +88,19 @@ class ExceptionArgs:
     Args:
         exception_type (Exception): The exception type.
         caller_module (str): Exception caller module.
-        caller_line (int): Exception caller line.
         caller_name (str): Exception function or class name.
-        traceback (bool): Display traceback details. Defaults to True.
-        all_tracing (bool): True will display all traceback calls. False will show most recent. Defaults to True.
+        caller_line (int): Exception caller line.
+        tb_limit (int): Traceback limit index at the most recent call. Defaults to None.
+        caller_override (dict): Changed traceback details. Defaults to None.
     """
-    __slots__ = "exception_type", "caller_module", "caller_line", "caller_name", "traceback", "all_tracing"
+    __slots__ = "exception_type", "caller_module", "caller_line", "caller_name", "tb_limit", "caller_override"
 
     exception_type: Exception
     caller_module: str
     caller_line: int
     caller_name: str
-    traceback: bool
-    all_tracing: bool
+    tb_limit: int
+    caller_override: dict
 
 
 @dataclass

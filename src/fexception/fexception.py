@@ -3,16 +3,20 @@ This is the starting point for the exceptions. Install fexception, set the modul
 This module creates additional information formatted exception output based on the built-in Python exceptions.
 All formatted exceptions are based on one level of the built-in Python exception hierarchy.
 """
-from typing import Optional
 import dataclasses
 import inspect
 import sys
+import os
+import traceback
+from typing import Optional
 from pathlib import Path
 
+
 from .formatter import exception_formatter
-from .util import KeyCheck, get_line_number
+from .util import KeyCheck
 from .common import (
-    ProcessedMessageArgs, ExceptionArgs, HookArgs,
+    ProcessedMessageArgs, ProcessedOverrideArgs,
+    ExceptionArgs, HookArgs,
     ErrorFormatFailure, InputFailure
 )
 
@@ -30,17 +34,27 @@ class ExceptionProcessor:
         message_args (ProcessedMessageArgs): Exception message args.
         exception_args (ExceptionArgs): Exception args to construct the formatted exception message.
     """
-    def __init__(self, message_args: ProcessedMessageArgs, exception_args: ExceptionArgs) -> None:
+    def __init__(self, message_args: dict, exception_args: ExceptionArgs) -> None:
         try:
-            self._processed_message_args = ConvertMessageArgs(message_args, exception_args).set_message_args()
+            self._processed_message_args = ConvertArgs(message_args, exception_args).set_message_args()
+            self._processed_override_args = ConvertArgs(message_args, exception_args).set_override_args()
+            # Checks if override args are set.
+            if 'module=None, name=None, line=None' not in str(self._processed_override_args):
+                # Updates the ExceptionArgs dataclass args with the override values.
+                exception_args = dataclasses.replace(exception_args,
+                                                     caller_module=self._processed_override_args.module)
+                exception_args = dataclasses.replace(exception_args,
+                                                     caller_name=self._processed_override_args.name)
+                exception_args = dataclasses.replace(exception_args,
+                                                     caller_line=self._processed_override_args.line)
             # Formats the exception message based on the args.
             self._formatted_exception = exception_formatter(self._processed_message_args, exception_args)
             self._exception_args = exception_args
         except InputFailure as exec:
             # Updates the selected exception_type to the internal exception error.
             exception_args = dataclasses.replace(exception_args, exception_type=InputFailure)
-            exception_args = dataclasses.replace(exception_args, traceback=True)
-            exception_args = dataclasses.replace(exception_args, all_tracing=True)
+            exception_args = dataclasses.replace(exception_args, tb_limit=None)
+            exception_args = dataclasses.replace(exception_args, caller_override=None)
             # Sets formatted exception to the internal exception error.
             self._formatted_exception = exec
             self._exception_args = exception_args
@@ -48,8 +62,8 @@ class ExceptionProcessor:
         except ErrorFormatFailure as exec:
             # Updates the selected exception_type to the internal exception error.
             exception_args = dataclasses.replace(exception_args, exception_type=ErrorFormatFailure)
-            exception_args = dataclasses.replace(exception_args, traceback=True)
-            exception_args = dataclasses.replace(exception_args, all_tracing=True)
+            exception_args = dataclasses.replace(exception_args, tb_limit=None)
+            exception_args = dataclasses.replace(exception_args, caller_override=None)
             # Sets formatted exception to the internal exception error.
             self._formatted_exception = exec
             self._exception_args = exception_args
@@ -66,39 +80,48 @@ class ExceptionProcessor:
         return str(self._formatted_exception)
 
 
-class ConvertMessageArgs(ExceptionProcessor):
+class ConvertArgs(ExceptionProcessor):
     """
     Validates the correct message_args keys are sent and converts the dictionary entries to a dataclass.
 
     Args:
-        message_args (dict): Exception message args.
-        exception_args (ExceptionArgs): Exception args to construct the formatted exception message.
+        ExceptionProcessor (class): Middleman caller.
     """
     def __init__(self, message_args: dict, exception_args: ExceptionArgs) -> None:
+        """
+        Args:
+            message_args (dict): Exception message args.
+            exception_args (ExceptionArgs): Exception args to construct the formatted exception message.
+        """
         self._message_args = message_args
         self._caller_module = exception_args.caller_module
         self._caller_name = exception_args.caller_name
         self._caller_line = exception_args.caller_line
-        self._traceback = exception_args.traceback
-        self._all_tracing = exception_args.all_tracing
+        self._tb_limit = exception_args.tb_limit
+        self._caller_override = exception_args.caller_override
 
     def set_message_args(self) -> ProcessedMessageArgs:
+        """
+        Validates the correct message_args keys are sent and converts the dictionary entries to a dataclass.
+        """
         if not isinstance(self._message_args, dict):
             raise InputFailure('Dictionary format is the required input to format an exception message. '
                                'Single line messages should use the built-in Python exceptions.')
-        if not isinstance(self._traceback, bool) or not isinstance(self._all_tracing, bool):
-            raise InputFailure('Bool format is the required input to set the traceback options.')
+        if self._tb_limit:
+            if not isinstance(self._tb_limit, int):
+                raise InputFailure('int format is the required input to set the traceback limit option.')
+
         try:
             # Creates a sample dictionary key to use as a contains match for the incoming exception formatter keys.
             match_dict_key = {'main_message': None, 'expected_result': None, 'returned_result': None,
-                              'suggested_resolution': None, 'original_exception': None}
+                              'suggested_resolution': None, 'original_exception': None, 'original_exception': None}
             # Pulls the keys from the importing exception dictionary.
             importing_exception_keys = list(self._message_args.keys())
             key_check = KeyCheck(match_dict_key,
                                  self._caller_module,
                                  self._caller_name,
                                  self._caller_line)
-            key_check.contains_keys(importing_exception_keys)
+            key_check.contains_keys(importing_exception_keys, reverse=True)
 
             main_message = self._message_args.get('main_message')
             expected_result = self._message_args.get('expected_result')
@@ -116,6 +139,51 @@ class ConvertMessageArgs(ExceptionProcessor):
                 original_exception=original_exception,
             )
 
+    def set_override_args(self) -> ProcessedOverrideArgs:
+        """
+        Validates the correct caller_override keys are sent and converts the dictionary entries to a dataclass.
+
+        Raises:
+            InputFailure: [description]
+            InputFailure: [description]
+
+        Returns:
+            ProcessedOverrideArgs: [description]
+        """
+        if self._caller_override:
+            if not isinstance(self._caller_override, dict):
+                raise InputFailure('dict format is the required input to set the caller override option.')
+
+            try:
+                # Creates a sample dictionary key to use as a contains match for the incoming exception formatter keys.
+                match_dict_key = {'module': None, 'name': None, 'line': None, 'tb_remove': None}
+                # Pulls the keys from the importing exception dictionary.
+                importing_exception_keys = list(self._caller_override.keys())
+                key_check = KeyCheck(match_dict_key,
+                                     self._caller_module,
+                                     self._caller_name,
+                                     self._caller_line)
+                key_check.all_keys(importing_exception_keys, reverse=True)
+
+                # Gets the dictionary values to set the overide arg
+                module = self._caller_override.get('module')
+                name = self._caller_override.get('name')
+                line = self._caller_override.get('line')
+            except Exception as exec:
+                raise InputFailure(exec)
+            else:
+                return ProcessedOverrideArgs(
+                    module=module,
+                    name=name,
+                    line=line,
+                )
+        else:
+            return ProcessedOverrideArgs(
+                module=None,
+                name=None,
+                line=None,
+            )
+
 
 class SetLocalExceptionHook(ExceptionProcessor):
     """
@@ -123,64 +191,92 @@ class SetLocalExceptionHook(ExceptionProcessor):
     the traceback output or no traceback output.
 
     Args:
-        message (str): The local module exception message.
+        ExceptionProcessor (class): Middleman caller.
     """
     def __init__(self, hook_args: HookArgs) -> None:
+        """
+        Args:
+            message (str): The local module exception message.
+        """
         self._formatted_exception = hook_args.formatted_exception
         self.exception_type = hook_args.exception_args.exception_type
-        self._traceback = hook_args.exception_args.traceback
-        self._all_tracing = hook_args.exception_args.all_tracing
 
         # Except hook will use custom exceptions and a formatted message,
         # so the kind and message variables will not be used but must exist.
-        def except_hook(kind, message, traceback) -> sys.excepthook:
+        def except_hook(kind, message, tb) -> sys.excepthook:
             # Returns the selected custom exception class and the formatted exception message.
             # Includes traceback.
-            sys.__excepthook__(self.exception_type, self.exception_type(self._formatted_exception), traceback)
+            sys.__excepthook__(self.exception_type, self.exception_type(self._formatted_exception), tb)
 
         sys.excepthook = except_hook
 
 
 class SetExceptionHook(ExceptionProcessor):
     """
-    Sets the message exception hook to set the most recent failure\\
-    last call in the traceback output, or, full exception with traceback,\\
-    or no traceback.
+    Sets the message exception hook to most recent failure\\
+    last call in the traceback output or no traceback.\\
 
-    No other raised exception tracebacks display when traceback is enabled.
+    Supports limited traceback output.
 
-    Note: traceback and all_tracing must be default True for each Exception class.
+    Supports traceback module removal.
 
     Args:
-        hook_args (HookArgs): The formatted excpetion message and exception args.
+        ExceptionProcessor (class): Middleman caller.
     """
     def __init__(self, hook_args: HookArgs) -> None:
+        """
+        Args:
+            hook_args (HookArgs): The formatted excpetion message and exception args.
+        """
         self._formatted_exception = hook_args.formatted_exception
-        self.exception_type = hook_args.exception_args.exception_type
-        self._traceback = hook_args.exception_args.traceback
-        self._all_tracing = hook_args.exception_args.all_tracing
+        self._exception_type = hook_args.exception_args.exception_type
+        self._tb_limit = hook_args.exception_args.tb_limit
+        if hook_args.exception_args.caller_override:
+            self._tb_remove = hook_args.exception_args.caller_override.get('tb_remove')
+        else:
+            self._tb_remove = None
 
         # Except hook will use custom exceptions and a formatted message,
         # so the kind and message variables will not be used but must exist.
-        def except_hook(kind, message, traceback) -> sys.excepthook:
-            if self._traceback:
-                # Returns the selected custom exception class and the formatted exception message.
-                # Includes traceback.
-                sys.__excepthook__(self.exception_type, self.exception_type(self._formatted_exception), traceback)
-            else:
-                # Returns the selected custom exception class and the formatted exception message.
-                # No traceback.
-                print(f'{self.exception_type.__name__}:', self._formatted_exception)
+        def except_hook(kind, message, tb) -> sys.excepthook:
+            # Checks of the user is setting the traceback limit with an index or override.
+            if hook_args.exception_args.caller_override is not None:
+                # Loops through each traceback to find the limit number.
+                for tb_level_index, (frame, _) in enumerate(traceback.walk_tb(tb)):
+                    if 'py' in self._tb_remove:
+                        tb_remove = self._tb_remove
+                    else:
+                        tb_remove = f'{self._tb_remove}.py'
+                    # Checks if the overwritten caller_module matches the trace to the
+                    # traceback to the position before the overwritten caller_module name.
+                    if os.path.basename(frame.f_code.co_filename) == tb_remove:
+                        # Checks if a limit is set.
+                        if self._tb_limit:
+                            # Check if the set tb_limit is greater than the index.
+                            if int(tb_level_index) > int(self._tb_limit):
+                                # Set tb_limit less than the index, so the set tb_limit will be used.
+                                limit = self._tb_limit
+                            else:
+                                # Set tb_limit was greater than the index. The index will be used
+                                # for the displayed traceback.
+                                limit = tb_level_index
+                        else:
+                            limit = tb_level_index
+                        break
+                    else:
+                        limit = None
+                else:
+                    limit = None
+                traceback.print_exception(self._exception_type, self._exception_type(self._formatted_exception), tb, limit=limit, chain=True)
+            elif isinstance(self._tb_limit, int):
+                traceback.print_exception(self._exception_type, self._exception_type(self._formatted_exception), tb, limit=self._tb_limit, chain=True)
 
-        # Checks if all tracing output is disabled or if traceback is disabled with the
-        # default all_tracing flag set to True. Calling sys.excepthook adjusts the way the
-        # exception is displayed.
+        # Checks if a tb_limit is set or caller_override is enabled.
         if (
-            (self._all_tracing is False)
-            or (self._traceback is False and self._all_tracing is True)
+            self._tb_limit is not None
+            or hook_args.exception_args.caller_override is not None
         ):
             sys.excepthook = except_hook
-
 
 # ########################################################
 # #################Base Exception Classes#################
@@ -194,21 +290,30 @@ class FKBaseException(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Base Exception' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -220,8 +325,8 @@ class FKBaseException(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -234,21 +339,30 @@ class FException(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Exception' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -260,8 +374,8 @@ class FException(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -274,21 +388,30 @@ class FArithmeticError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Arithmetic Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -300,8 +423,8 @@ class FArithmeticError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -314,21 +437,30 @@ class FBufferError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Buffer Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -340,8 +472,8 @@ class FBufferError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -354,21 +486,30 @@ class FLookupError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Lookup Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -380,8 +521,8 @@ class FLookupError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -399,21 +540,30 @@ class FAssertionError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Assertion Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -425,8 +575,8 @@ class FAssertionError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -439,21 +589,30 @@ class FAttributeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Attribute Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -465,8 +624,8 @@ class FAttributeError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -479,21 +638,30 @@ class FEOFError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'EOF Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -505,8 +673,8 @@ class FEOFError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -519,21 +687,30 @@ class FFloatingPointError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'FloatingPoint Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -545,8 +722,8 @@ class FFloatingPointError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -559,21 +736,30 @@ class FGeneratorExit(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Generator Exit' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -585,8 +771,8 @@ class FGeneratorExit(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -599,21 +785,30 @@ class FImportError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Import Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -625,8 +820,8 @@ class FImportError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -639,21 +834,30 @@ class FModuleNotFoundError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'ModuleNotFound Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -665,8 +869,8 @@ class FModuleNotFoundError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -679,21 +883,30 @@ class FIndexError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Index Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -705,8 +918,8 @@ class FIndexError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -719,21 +932,30 @@ class FKeyError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Key Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -745,8 +967,8 @@ class FKeyError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -759,21 +981,30 @@ class FKeyboardInterrupt(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Keyboard Interrupt' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -785,8 +1016,8 @@ class FKeyboardInterrupt(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -799,21 +1030,30 @@ class FMemoryError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Memory Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -825,8 +1065,8 @@ class FMemoryError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -839,21 +1079,30 @@ class FNameError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Name Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -865,8 +1114,8 @@ class FNameError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -879,21 +1128,30 @@ class FNotImplementedError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted ''NotImplemented Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -905,8 +1163,8 @@ class FNotImplementedError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -919,21 +1177,30 @@ class FOSError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'OS Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -945,8 +1212,8 @@ class FOSError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -959,21 +1226,30 @@ class FOverflowError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Overflow Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -985,8 +1261,8 @@ class FOverflowError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -999,21 +1275,30 @@ class FRecursionError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Recursion Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1025,8 +1310,8 @@ class FRecursionError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1039,21 +1324,30 @@ class FReferenceError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Reference Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1065,8 +1359,8 @@ class FReferenceError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1079,21 +1373,30 @@ class FRuntimeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Runtime Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1105,8 +1408,8 @@ class FRuntimeError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1119,21 +1422,30 @@ class FStopIteration(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Stop Iteration' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1145,8 +1457,8 @@ class FStopIteration(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1159,21 +1471,30 @@ class FStopAsyncIteration(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'StopAsync Iteration' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1185,8 +1506,8 @@ class FStopAsyncIteration(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1199,21 +1520,30 @@ class FSyntaxError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Syntax Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1225,8 +1555,8 @@ class FSyntaxError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1239,21 +1569,30 @@ class FIndentationError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Indentation Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1265,8 +1604,8 @@ class FIndentationError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1279,21 +1618,30 @@ class FTabError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Tab Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1305,8 +1653,8 @@ class FTabError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1319,21 +1667,30 @@ class FSystemError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'System Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1345,8 +1702,8 @@ class FSystemError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1359,21 +1716,30 @@ class FSystemExit(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'System Exit' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1385,8 +1751,8 @@ class FSystemExit(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1399,21 +1765,30 @@ class FTypeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Type Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1425,8 +1800,8 @@ class FTypeError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1439,21 +1814,30 @@ class FUnboundLocalError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Unbound Local Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1465,8 +1849,8 @@ class FUnboundLocalError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1479,21 +1863,30 @@ class FUnicodeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Unicode Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1505,8 +1898,8 @@ class FUnicodeError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1519,21 +1912,30 @@ class FUnicodeEncodeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Unicode Encode Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1545,8 +1947,8 @@ class FUnicodeEncodeError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1559,21 +1961,30 @@ class FUnicodeDecodeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Unicode Decode Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1585,8 +1996,8 @@ class FUnicodeDecodeError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1599,21 +2010,30 @@ class FUnicodeTranslateError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Unicode Translate Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1625,8 +2045,8 @@ class FUnicodeTranslateError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1639,21 +2059,30 @@ class FValueError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Value Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1665,8 +2094,8 @@ class FValueError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1679,21 +2108,30 @@ class FZeroDivisionError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Zero Division Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1705,8 +2143,8 @@ class FZeroDivisionError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1719,21 +2157,30 @@ class FEnvironmentError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Environment Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1745,8 +2192,8 @@ class FEnvironmentError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1759,21 +2206,30 @@ class FIOError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'IO Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1785,8 +2241,8 @@ class FIOError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1799,21 +2255,30 @@ class FWindowsError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Windows Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1825,8 +2290,8 @@ class FWindowsError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1844,21 +2309,30 @@ class FBlockingIOError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'BlockingIO Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1870,8 +2344,8 @@ class FBlockingIOError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1884,21 +2358,30 @@ class FChildProcessError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Child Process Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1910,8 +2393,8 @@ class FChildProcessError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1924,21 +2407,30 @@ class FConnectionError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Connection Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1950,8 +2442,8 @@ class FConnectionError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -1964,21 +2456,30 @@ class FBrokenPipeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Broken Pipe Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1990,8 +2491,8 @@ class FBrokenPipeError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2004,21 +2505,30 @@ class FConnectionAbortedError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Connection Aborted Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2030,8 +2540,8 @@ class FConnectionAbortedError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2044,21 +2554,30 @@ class FConnectionRefusedError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Connection Refused Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2070,8 +2589,8 @@ class FConnectionRefusedError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2084,21 +2603,30 @@ class FConnectionResetError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Connection Reset Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2110,8 +2638,8 @@ class FConnectionResetError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2124,21 +2652,30 @@ class FFileExistsError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'File Exists Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2150,8 +2687,8 @@ class FFileExistsError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2164,21 +2701,30 @@ class FFileNotFoundError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'FileNotFound Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2190,8 +2736,8 @@ class FFileNotFoundError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2204,21 +2750,30 @@ class FInterruptedError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Interrupted Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2230,8 +2785,8 @@ class FInterruptedError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2244,21 +2799,30 @@ class FIsADirectoryError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'IsADirectory Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2270,8 +2834,8 @@ class FIsADirectoryError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2284,21 +2848,30 @@ class FNotADirectoryError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'NotADirectory Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2310,8 +2883,8 @@ class FNotADirectoryError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2324,21 +2897,30 @@ class FPermissionError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Permission Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2350,8 +2932,8 @@ class FPermissionError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2364,21 +2946,30 @@ class FProcessLookupError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Process Lookup Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2390,8 +2981,8 @@ class FProcessLookupError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2404,21 +2995,30 @@ class FTimeoutError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Timeout Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2430,8 +3030,8 @@ class FTimeoutError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2449,21 +3049,30 @@ class FWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Warning' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2475,8 +3084,8 @@ class FWarning(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2489,21 +3098,30 @@ class FUserWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'User Warning' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2515,8 +3133,8 @@ class FUserWarning(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2529,21 +3147,30 @@ class FDeprecationWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Deprecation Warning' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2555,8 +3182,8 @@ class FDeprecationWarning(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2569,21 +3196,30 @@ class FPendingDeprecationWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Pending Deprecation Warning' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2595,8 +3231,8 @@ class FPendingDeprecationWarning(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2609,21 +3245,30 @@ class FSyntaxWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Syntax Warning' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2635,8 +3280,8 @@ class FSyntaxWarning(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2649,21 +3294,30 @@ class FRuntimeWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Runtime Warning' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2675,8 +3329,8 @@ class FRuntimeWarning(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2689,21 +3343,30 @@ class FFutureWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Future Warning' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2715,8 +3378,8 @@ class FFutureWarning(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2729,21 +3392,30 @@ class FImportWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Import Warning' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2755,8 +3427,8 @@ class FImportWarning(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2769,21 +3441,30 @@ class FUnicodeWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Unicode Warning' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2795,8 +3476,8 @@ class FUnicodeWarning(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2809,21 +3490,30 @@ class FEncodingWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Encoding Warning' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2835,8 +3525,8 @@ class FEncodingWarning(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2849,21 +3539,30 @@ class FBytesWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Bytes Warning' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2875,8 +3574,8 @@ class FBytesWarning(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2889,21 +3588,30 @@ class FResourceWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Resource Warning' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2915,8 +3623,8 @@ class FResourceWarning(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)
@@ -2937,22 +3645,32 @@ class FCustomException(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'Custom Exception' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
                 custom_type (custom_type, Optional): The custom exception type.
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
+
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2992,8 +3710,8 @@ class FCustomException(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             Exception.__init__(self, self._formatted_exception)
 
@@ -3010,21 +3728,30 @@ class FGeneralError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, traceback: Optional[bool] = True, all_tracing: Optional[bool] = True) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
         """
         Formatted 'General Error' with additional exception message options.
 
         Args:
-            message_args (Union[dict, str]): Dictionary will create a formatted exception message.
-            traceback (bool, Optional): Displays most recent traceback output. Defaults to True.
-            all_tracing (bool, Optional): True displays all traceback. False will show most recent. Defaults to True.
+            message_args (dict): Dictionary will create a formatted exception message.
+            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
+            \t\t\t\t     Defaults to None.
+            caller_override (dict, Optional): Change the traceback output.\\
+            \t\t\t\t\t\t  Defaults to None.
 
-            Keys:\\
+        Arg Keys:
+            message_args Keys:\\
                 main_message (str): The main exception message.\\
                 expected_result (Union[str, list], Optional): The expected result.\\
                 returned_result (Union[str, list], Optional): The returned result.\\
                 suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
                 original_exception (any, Optional): The original exception.\\
+
+            caller_override Keys:\\
+                module (str): The override module.
+                name (str): The override name.
+                line (int): The override line
+                tb_remove (str): The traceback module name that needs to be removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3036,8 +3763,8 @@ class FGeneralError(Exception):
                                                                          caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                                                          caller_line=inspect.currentframe().f_back.f_lineno,
                                                                          caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         traceback=traceback,
-                                                                         all_tracing=all_tracing))
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
             # Sets the Exception output used for printing the exception message.
             Exception.__init__(self, self._formatted_exception)

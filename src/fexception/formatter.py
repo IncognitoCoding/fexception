@@ -16,8 +16,10 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
         exception_args (ExceptionArgs): Exception args to populate the formatted exception message.
     """
     try:
-        caller_name = exception_args.caller_name
         caller_module = exception_args.caller_module
+        caller_name = exception_args.caller_name
+        if str(caller_name) == '<module>':
+            caller_name = '__main__'
         caller_line = exception_args.caller_line
 
         # #################################################
@@ -47,7 +49,7 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
         if processed_message_args.main_message:
             formatted_main_message = f'{processed_message_args.main_message}\n'
         else:
-            formatted_main_message = ' None: No Message Provided'
+            formatted_main_message = ' None: No Message Provided\n'
 
         if processed_message_args.expected_result:
             formatted_expected_result = ('Expected Result:\n'
@@ -62,15 +64,26 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
             formatted_returned_result = ''
 
         if processed_message_args.original_exception:
+            nested_module = Path(processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_filename).stem
+            nested_name = processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_name
+            if str(nested_name) == '<module>':
+                nested_name = '__main__'
+            nested_line = processed_message_args.original_exception.__traceback__.tb_lineno
+
             formatted_original_exception = ('Nested Exception:\n\n'
-                                            + '            ' + (('~' * 150) + '\n            ') + (('~' * 63) + 'Start Original Exception' + ('~' * 63) + '\n            ') + (('~' * 150) + '\n            \n')
+                                            + '            '
+                                            + (('~' * 150) + '\n            ')
+                                            + (('~' * 63) + 'Start Original Exception' + ('~' * 63) + '\n            ')
+                                            + (('~' * 150) + '\n            \n')
                                             + f'{formatted_original_exception}\n\n'
                                             + f'            Nested Trace Details:\n'
                                             + f'              - Exception: {type(processed_message_args.original_exception).__name__}\n'
-                                            + f'              - Module: {Path(processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_filename).stem}\n'
-                                            + f'              - Name: {processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_name}\n'
-                                            + f'              - Line: {processed_message_args.original_exception.__traceback__.tb_lineno}\n'
-                                            + '            ' + (('~' * 150) + '\n            ') + (('~' * 65) + 'End Original Exception' + ('~' * 63) + '\n            ') + (('~' * 150) + '\n            \n'))
+                                            + f'              - Module: {nested_module}\n'
+                                            + f'              - Name: {nested_name}\n'
+                                            + f'              - Line: {nested_line}\n'
+                                            + '            ' + (('~' * 150) + '\n            ')
+                                            + (('~' * 65) + 'End Original Exception' + ('~' * 63) + '\n            ')
+                                            + (('~' * 150) + '\n            \n'))
         else:
             formatted_original_exception = ''
 
@@ -82,7 +95,9 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
 
         exception_message = (
             formatted_main_message
-            + (('-' * 150) + '\n') + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n') + (('-' * 150) + '\n')
+            + (('-' * 150) + '\n')
+            + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n')
+            + (('-' * 150) + '\n')
             + formatted_expected_result
             + formatted_returned_result
             + formatted_original_exception
