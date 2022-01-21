@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 from .formatter import exception_formatter
-from .util import KeyCheck
+from .util import InvalidKeyError, KeyCheck
 from .common import (
     ProcessedMessageArgs, ProcessedOverrideArgs,
     ExceptionArgs, HookArgs,
@@ -27,14 +27,17 @@ from .common import (
 
 
 class ExceptionProcessor:
-    """
-    Processes the exception message arguments and makes the middleman calls.
-
-    Args:
-        message_args (ProcessedMessageArgs): Exception message args.
-        exception_args (ExceptionArgs): Exception args to construct the formatted exception message.
-    """
+    """Processes the exception message arguments and makes the middleman calls."""
     def __init__(self, message_args: dict, exception_args: ExceptionArgs) -> None:
+        """
+        Processes the exception message arguments and makes the middleman calls.
+
+        Args:
+            message_args (ProcessedMessageArgs):\\
+            \t\\- Exception message args.
+            exception_args (ExceptionArgs):\\
+            \t\\- Exception args to construct the formatted exception message.
+        """
         try:
             self._processed_message_args = ConvertArgs(message_args, exception_args).set_message_args()
             self._processed_override_args = ConvertArgs(message_args, exception_args).set_override_args()
@@ -74,24 +77,26 @@ class ExceptionProcessor:
 
     def __str__(self) -> str:
         """
-        Returns the formatted exception for use in nested formatted exceptions
-        or other areas when the exception is not raised.
+        Returns the formatted exception for use in nested formatted\\
+        exceptions or other areas when the exception is not raised.
         """
         return str(self._formatted_exception)
 
 
 class ConvertArgs(ExceptionProcessor):
-    """
-    Validates the correct message_args keys are sent and converts the dictionary entries to a dataclass.
+    """Validates the correct message_args keys are sent\\
+        and converts the dictionary entries to a dataclass."""
 
-    Args:
-        ExceptionProcessor (class): Middleman caller.
-    """
     def __init__(self, message_args: dict, exception_args: ExceptionArgs) -> None:
         """
+        Validates the correct message_args keys are sent\\
+        and converts the dictionary entries to a dataclass.
+
         Args:
-            message_args (dict): Exception message args.
-            exception_args (ExceptionArgs): Exception args to construct the formatted exception message.
+            message_args (dict):\\
+            \t\\- Exception message args.
+            exception_args (ExceptionArgs):\\
+            \t\\- Exception args to construct the formatted exception message.
         """
         self._message_args = message_args
         self._caller_module = exception_args.caller_module
@@ -102,7 +107,20 @@ class ConvertArgs(ExceptionProcessor):
 
     def set_message_args(self) -> ProcessedMessageArgs:
         """
-        Validates the correct message_args keys are sent and converts the dictionary entries to a dataclass.
+        Validates the correct message_args keys are sent\\
+        and converts the dictionary entries to a dataclass.
+
+        Raises:
+            InputFailure:\\
+            \t\\- Dictionary format is the required input to format an exception message.\\
+            \t   Single line messages should use the built-in Python exceptions.
+            InputFailure:\\
+            \t\\- int format is the required input to set the traceback limit option.
+            InputFailure:\\
+            \t\\- KeyCheck raised exceptions.
+
+        Returns:
+            ProcessedMessageArgs: Message arguments in the dataclass.
         """
         if not isinstance(self._message_args, dict):
             raise InputFailure('Dictionary format is the required input to format an exception message. '
@@ -128,7 +146,7 @@ class ConvertArgs(ExceptionProcessor):
             returned_result = self._message_args.get('returned_result')
             suggested_resolution = self._message_args.get('suggested_resolution')
             original_exception = self._message_args.get('original_exception')
-        except Exception as exec:
+        except (AttributeError, InvalidKeyError) as exec:
             raise InputFailure(exec)
         else:
             return ProcessedMessageArgs(
@@ -144,11 +162,13 @@ class ConvertArgs(ExceptionProcessor):
         Validates the correct caller_override keys are sent and converts the dictionary entries to a dataclass.
 
         Raises:
-            InputFailure: [description]
-            InputFailure: [description]
+            InputFailure:\\
+            \t\\- dict format is the required input to set the caller override option.
+            InputFailure:\\
+            \t\\- KeyCheck raised exceptions.
 
         Returns:
-            ProcessedOverrideArgs: [description]
+            ProcessedOverrideArgs: Overide arguments in the dataclass.
         """
         if self._caller_override:
             if not isinstance(self._caller_override, dict):
@@ -169,7 +189,7 @@ class ConvertArgs(ExceptionProcessor):
                 module = self._caller_override.get('module')
                 name = self._caller_override.get('name')
                 line = self._caller_override.get('line')
-            except Exception as exec:
+            except (AttributeError, InvalidKeyError) as exec:
                 raise InputFailure(exec)
             else:
                 return ProcessedOverrideArgs(
@@ -186,15 +206,13 @@ class ConvertArgs(ExceptionProcessor):
 
 
 class SetLocalExceptionHook(ExceptionProcessor):
-    """
-    Local exception hook to sets the most recent failure last call in
-    the traceback output or no traceback output.
+    """Local exception hook to sets the most recent failure"""
 
-    Args:
-        ExceptionProcessor (class): Middleman caller.
-    """
     def __init__(self, hook_args: HookArgs) -> None:
         """
+        Local exception hook to sets the most recent failure\\
+        last call in the traceback output or no traceback output.
+
         Args:
             message (str): The local module exception message.
         """
@@ -212,21 +230,20 @@ class SetLocalExceptionHook(ExceptionProcessor):
 
 
 class SetExceptionHook(ExceptionProcessor):
-    """
-    Sets the message exception hook to most recent failure\\
-    last call in the traceback output or no traceback.\\
+    """Sets the message exception hook to most recent failure"""
 
-    Supports limited traceback output.
-
-    Supports traceback module removal.
-
-    Args:
-        ExceptionProcessor (class): Middleman caller.
-    """
     def __init__(self, hook_args: HookArgs) -> None:
         """
+        Sets the message exception hook to most recent failure\\
+        last call in the traceback output or no traceback.\\
+
+        Supports limited traceback output.
+
+        Supports traceback module removal.
+    
         Args:
-            hook_args (HookArgs): The formatted excpetion message and exception args.
+            hook_args (HookArgs):\\
+            \t\\- The formatted excpetion message and exception args.
         """
         self._formatted_exception = hook_args.formatted_exception
         self._exception_type = hook_args.exception_args.exception_type
@@ -267,9 +284,14 @@ class SetExceptionHook(ExceptionProcessor):
                         limit = None
                 else:
                     limit = None
-                traceback.print_exception(self._exception_type, self._exception_type(self._formatted_exception), tb, limit=limit, chain=True)
+                traceback.print_exception(self._exception_type,
+                                          self._exception_type(self._formatted_exception),
+                                          tb, limit=limit, chain=True)
             elif isinstance(self._tb_limit, int):
-                traceback.print_exception(self._exception_type, self._exception_type(self._formatted_exception), tb, limit=self._tb_limit, chain=True)
+                traceback.print_exception(self._exception_type,
+                                          self._exception_type(self._formatted_exception),
+                                          tb,
+                                          limit=self._tb_limit, chain=True)
 
         # Checks if a tb_limit is set or caller_override is enabled.
         if (
@@ -295,25 +317,37 @@ class FKBaseException(Exception):
         Formatted 'Base Exception' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -344,25 +378,37 @@ class FException(Exception):
         Formatted 'Exception' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -393,25 +439,37 @@ class FArithmeticError(Exception):
         Formatted 'Arithmetic Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -442,25 +500,37 @@ class FBufferError(Exception):
         Formatted 'Buffer Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -491,25 +561,37 @@ class FLookupError(Exception):
         Formatted 'Lookup Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -545,25 +627,37 @@ class FAssertionError(Exception):
         Formatted 'Assertion Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -594,25 +688,37 @@ class FAttributeError(Exception):
         Formatted 'Attribute Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -643,25 +749,37 @@ class FEOFError(Exception):
         Formatted 'EOF Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -692,25 +810,37 @@ class FFloatingPointError(Exception):
         Formatted 'FloatingPoint Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -741,25 +871,37 @@ class FGeneratorExit(Exception):
         Formatted 'Generator Exit' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -790,25 +932,37 @@ class FImportError(Exception):
         Formatted 'Import Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -839,25 +993,37 @@ class FModuleNotFoundError(Exception):
         Formatted 'ModuleNotFound Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -888,25 +1054,37 @@ class FIndexError(Exception):
         Formatted 'Index Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -937,25 +1115,37 @@ class FKeyError(Exception):
         Formatted 'Key Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -986,25 +1176,37 @@ class FKeyboardInterrupt(Exception):
         Formatted 'Keyboard Interrupt' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1035,25 +1237,37 @@ class FMemoryError(Exception):
         Formatted 'Memory Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1084,25 +1298,37 @@ class FNameError(Exception):
         Formatted 'Name Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1133,25 +1359,37 @@ class FNotImplementedError(Exception):
         Formatted ''NotImplemented Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1182,25 +1420,37 @@ class FOSError(Exception):
         Formatted 'OS Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1231,25 +1481,37 @@ class FOverflowError(Exception):
         Formatted 'Overflow Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1280,25 +1542,37 @@ class FRecursionError(Exception):
         Formatted 'Recursion Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1329,25 +1603,37 @@ class FReferenceError(Exception):
         Formatted 'Reference Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1378,25 +1664,37 @@ class FRuntimeError(Exception):
         Formatted 'Runtime Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1427,25 +1725,37 @@ class FStopIteration(Exception):
         Formatted 'Stop Iteration' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1476,25 +1786,37 @@ class FStopAsyncIteration(Exception):
         Formatted 'StopAsync Iteration' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1525,25 +1847,37 @@ class FSyntaxError(Exception):
         Formatted 'Syntax Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1574,25 +1908,37 @@ class FIndentationError(Exception):
         Formatted 'Indentation Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1623,25 +1969,37 @@ class FTabError(Exception):
         Formatted 'Tab Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1672,25 +2030,37 @@ class FSystemError(Exception):
         Formatted 'System Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1721,25 +2091,37 @@ class FSystemExit(Exception):
         Formatted 'System Exit' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1770,25 +2152,37 @@ class FTypeError(Exception):
         Formatted 'Type Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1819,25 +2213,37 @@ class FUnboundLocalError(Exception):
         Formatted 'Unbound Local Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1868,25 +2274,37 @@ class FUnicodeError(Exception):
         Formatted 'Unicode Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1917,25 +2335,37 @@ class FUnicodeEncodeError(Exception):
         Formatted 'Unicode Encode Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -1966,25 +2396,37 @@ class FUnicodeDecodeError(Exception):
         Formatted 'Unicode Decode Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2015,25 +2457,37 @@ class FUnicodeTranslateError(Exception):
         Formatted 'Unicode Translate Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2064,25 +2518,37 @@ class FValueError(Exception):
         Formatted 'Value Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2113,25 +2579,37 @@ class FZeroDivisionError(Exception):
         Formatted 'Zero Division Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2162,25 +2640,37 @@ class FEnvironmentError(Exception):
         Formatted 'Environment Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2211,25 +2701,37 @@ class FIOError(Exception):
         Formatted 'IO Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2260,25 +2762,37 @@ class FWindowsError(Exception):
         Formatted 'Windows Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2314,25 +2828,37 @@ class FBlockingIOError(Exception):
         Formatted 'BlockingIO Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2363,25 +2889,37 @@ class FChildProcessError(Exception):
         Formatted 'Child Process Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2412,25 +2950,37 @@ class FConnectionError(Exception):
         Formatted 'Connection Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2461,25 +3011,37 @@ class FBrokenPipeError(Exception):
         Formatted 'Broken Pipe Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2510,25 +3072,37 @@ class FConnectionAbortedError(Exception):
         Formatted 'Connection Aborted Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2559,25 +3133,37 @@ class FConnectionRefusedError(Exception):
         Formatted 'Connection Refused Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2608,25 +3194,37 @@ class FConnectionResetError(Exception):
         Formatted 'Connection Reset Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2657,25 +3255,37 @@ class FFileExistsError(Exception):
         Formatted 'File Exists Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2706,25 +3316,37 @@ class FFileNotFoundError(Exception):
         Formatted 'FileNotFound Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2755,25 +3377,37 @@ class FInterruptedError(Exception):
         Formatted 'Interrupted Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2804,25 +3438,37 @@ class FIsADirectoryError(Exception):
         Formatted 'IsADirectory Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2853,25 +3499,37 @@ class FNotADirectoryError(Exception):
         Formatted 'NotADirectory Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2902,25 +3560,37 @@ class FPermissionError(Exception):
         Formatted 'Permission Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -2951,25 +3621,37 @@ class FProcessLookupError(Exception):
         Formatted 'Process Lookup Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3000,25 +3682,37 @@ class FTimeoutError(Exception):
         Formatted 'Timeout Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3054,25 +3748,37 @@ class FWarning(Exception):
         Formatted 'Warning' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3103,25 +3809,37 @@ class FUserWarning(Exception):
         Formatted 'User Warning' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3152,25 +3870,37 @@ class FDeprecationWarning(Exception):
         Formatted 'Deprecation Warning' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3201,25 +3931,37 @@ class FPendingDeprecationWarning(Exception):
         Formatted 'Pending Deprecation Warning' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3250,25 +3992,37 @@ class FSyntaxWarning(Exception):
         Formatted 'Syntax Warning' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3299,25 +4053,37 @@ class FRuntimeWarning(Exception):
         Formatted 'Runtime Warning' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3348,25 +4114,37 @@ class FFutureWarning(Exception):
         Formatted 'Future Warning' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3397,25 +4175,37 @@ class FImportWarning(Exception):
         Formatted 'Import Warning' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3446,25 +4236,37 @@ class FUnicodeWarning(Exception):
         Formatted 'Unicode Warning' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3495,25 +4297,37 @@ class FEncodingWarning(Exception):
         Formatted 'Encoding Warning' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3544,25 +4358,37 @@ class FBytesWarning(Exception):
         Formatted 'Bytes Warning' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3593,25 +4419,37 @@ class FResourceWarning(Exception):
         Formatted 'Resource Warning' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3640,7 +4478,6 @@ class FCustomException(Exception):
     Formatted 'Custom Exception' with additional exception message options.
 
     This class is ideal for defining custom exceptions within a module and having the exception formatted, but using your custom exception name.
-
     """
     __slots__ = 'message_args'
     __module__ = 'builtins'
@@ -3649,28 +4486,44 @@ class FCustomException(Exception):
         """
         Formatted 'Custom Exception' with additional exception message options.
 
+        FCustomException is used to add custom exception classes to the message.
+
+        An exception class is required to use this option.
+
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
-                custom_type (custom_type, Optional): The custom exception type.
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- custom_type (custom_type):\\
+            \t\t\\- The custom exception type.
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
-
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.
@@ -3733,25 +4586,37 @@ class FGeneralError(Exception):
         Formatted 'General Error' with additional exception message options.
 
         Args:
-            message_args (dict): Dictionary will create a formatted exception message.
-            tb_limit (int, Optional): Set the traceback limit index at the most recent call.
-            \t\t\t\t     Defaults to None.
-            caller_override (dict, Optional): Change the traceback output.\\
-            \t\t\t\t\t\t  Defaults to None.
+            message_args (dict):\\
+            \t\\- Dictionary will create a formatted exception message.\\
+            tb_limit (int, Optional):\\
+            \t\\- Set the traceback limit index at the most recent call.\\
+            \t\\-  Defaults to None.\\
+            caller_override (dict, Optional):\\
+            \t\\- Change the traceback output.\\
+            \t\\- Defaults to None.
 
         Arg Keys:
             message_args Keys:\\
-                main_message (str): The main exception message.\\
-                expected_result (Union[str, list], Optional): The expected result.\\
-                returned_result (Union[str, list], Optional): The returned result.\\
-                suggested_resolution (Union[str, list], Optional): A suggested resolution.\\
-                original_exception (any, Optional): The original exception.\\
+            \t\\- main_message (str):\\
+            \t\t\\- The main exception message.\\
+            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\t\\- The expected result.\\
+            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\t\\- The returned result.\\
+            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\t\\- A suggested resolution.\\
+            \t\\- original_exception (any, Optional):\\
+            \t\t\\- The original exception.
 
             caller_override Keys:\\
-                module (str): The override module.
-                name (str): The override name.
-                line (int): The override line
-                tb_remove (str): The traceback module name that needs to be removed.
+            \t\\- module (str):\\
+            \t\t\\- The override module.\\
+            \t\\- name (str):\\
+            \t\t\\- The override name.\\
+            \t\\- line (int):\\
+            \t\t\\- The override line.\\
+            \t\\- tb_remove (str):\\
+            \t\t\\- The traceback module name that needing removed.
         """
         # except_hook is the function that returns the formatted exception.
         # When the formatted message is returned, the calling function is used to set the class.

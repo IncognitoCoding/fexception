@@ -2,6 +2,7 @@ import traceback
 import pytest
 
 from fexception import FCustomException, FValueError
+from fexception.fexception import FException
 from nested import type_validate_override, type_validate_no_override
 
 
@@ -54,6 +55,9 @@ def test_1_nested_no_override():
 
 
 def test_1_FValueError():
+    """
+    Tests formatting a standard exception.
+    """
     with pytest.raises(Exception) as excinfo:
         exec_args = {
             'main_message': 'Problem with the construction project.',
@@ -71,6 +75,9 @@ def test_1_FValueError():
 
 
 def test_1_FCustomException():
+    """
+    Tests formatting a custom type exception.
+    """
     with pytest.raises(Exception) as excinfo:
         exec_args = {
             'main_message': 'Testing the FCustomException exception.',
@@ -86,6 +93,9 @@ def test_1_FCustomException():
 
 
 def test_2_FCustomException():
+    """
+    Tests an incorrect custom type exception.
+    """
     with pytest.raises(Exception) as excinfo:
         exec_args = {
             'main_message': 'This is my test error message.',
@@ -96,6 +106,9 @@ def test_2_FCustomException():
 
 
 def test_2_FValueError():
+    """
+    Tests a bad input key in teh exec_args dictionary.
+    """
     with pytest.raises(Exception) as excinfo:
         exec_args = {
             'bad_key': 'Problem with the construction project.',
@@ -105,6 +118,20 @@ def test_2_FValueError():
 
 
 def test_2_1_FValueError():
+    """
+    Tests no keys.
+    """
+    with pytest.raises(Exception) as excinfo:
+        exec_args = {
+        }
+        raise FValueError(exec_args)
+    assert 'No key(s) were sent.' in str(excinfo.value)
+
+
+def test_2_2_FValueError():
+    """
+    Tests removing the key tb_remove to trigger the failure.
+    """
     with pytest.raises(Exception) as excinfo:
         exec_args = {
             'main_message': 'Sample nested failure.',
@@ -116,13 +143,15 @@ def test_2_1_FValueError():
             'module': 'my_sample',
             'name': 'sample',
             'line': 1000,
-            # tb_remove is removed to trigger the failure.
         }
         raise FValueError(exec_args, None, caller_override)
     assert 'The input keys have inconsistent value and requirement keys' in str(excinfo.value)
 
 
-def test_2_2_FValueError():
+def test_2_3_FValueError():
+    """
+    Tests a bad input key in teh caller_override dictionary.
+    """
     with pytest.raises(Exception) as excinfo:
         exec_args = {
             'main_message': 'Sample nested failure.',

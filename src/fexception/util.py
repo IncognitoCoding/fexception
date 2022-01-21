@@ -37,8 +37,10 @@ class KeyCheck():
     Raises an exception if the key validation is unsuccessful. No return output.
 
     Options:\\
-    \tcontains_keys(): Checks if some required keys exist in the dictionary.\\
-    \tall_keys(): Checks if all required keys exist in the dictionary.
+    \t\\- contains_keys():\\
+    \t\t\\- Checks if some required keys exist in the dictionary.\\
+    \t\\- all_keys():\\
+    \t\t\\- Checks if all required keys exist in the dictionary.
 
     Args:
         values (dict): A dictionary that needs the keys validated.
@@ -61,17 +63,23 @@ class KeyCheck():
         Checks if some required keys exist in the dictionary.
 
         Args:
-            required_keys (Union[str, list])): The required key(s) that should match.\\
-            \t\t\t\t\t\t   Can be a single str or list of keys.
-            reverse (bool, optional): Reverses the key check error output, so the\\
-            \t\t\t\t       expected result and returned results are flipped.\\
-            \t\t\t\t       Defaults to False.
+            required_keys (Union[str, list])):\\
+            \t\\- The required key(s) that should match.\\
+            \t\\- Can be a single str or list of keys.
+            reverse (bool, optional):\\
+            \t\\- Reverses the key check error output, so the\\
+            \t\\- expected result and returned results are flipped.\\
+            \t\\- Defaults to False.
 
         Raises:
-            AttributeError: The input keys have inconsistent value and requirement keys.
-            AttributeError: The expected key list contains duplicate keys. All keys must be unique.
-            InvalidKeyError: The dictionary key (\'{no_matching_key}\') does not exist in the expected required key(s).
-            InvalidKeyError: The dictionary key (\'{no_matching_key}\') does not match any expected match option key(s).
+            AttributeError:
+            \t\\- The input keys have inconsistent value and requirement keys.
+            AttributeError:
+            \t\\- The expected key list contains duplicate keys. All keys must be unique.
+            InvalidKeyError:
+            \t\\- The dictionary key (\'{no_matching_key}\') does not exist in the expected required key(s).
+            InvalidKeyError:
+            \t\\- The dictionary key (\'{no_matching_key}\') does not match any expected match option key(s).
         """
         self._required_keys = required_keys
         self._all_key_check = False
@@ -83,17 +91,23 @@ class KeyCheck():
         Checks if all required keys exist in the dictionary
 
         Args:
-            required_keys (Union[str, list])): The required key(s) that should match.\\
-            \t\t\t\t\t\t   Can be a single str or list of keys.
-            reverse (bool, optional): Reverses the key check error output, so the\\
-            \t\t\t\t       expected result and returned results are flipped.\\
-            \t\t\t\t       Defaults to False.
+            required_keys (Union[str, list])):\\
+            \t\\- The required key(s) that should match.\\
+            \t\\- Can be a single str or list of keys.
+            reverse (bool, optional):\\
+            \t\\- Reverses the key check error output, so the\\
+            \t\\- expected result and returned results are flipped.\\
+            \t\\- Defaults to False.
 
         Raises:
-            AttributeError: The input keys have inconsistent value and requirement keys.
-            AttributeError: The expected key list contains duplicate keys. All keys must be unique.
-            InvalidKeyError: The dictionary key (\'{no_matching_key}\') does not exist in the expected required key(s).
-            InvalidKeyError: The dictionary key (\'{no_matching_key}\') does not match any expected match option key(s).
+            AttributeError:\\
+            \t\\- The input keys have inconsistent value and requirement keys.
+            AttributeError:\\
+            \t\\- The expected key list contains duplicate keys. All keys must be unique.
+            InvalidKeyError:\\
+            \t\\- The dictionary key (\'{no_matching_key}\') does not exist in the expected required key(s).
+            InvalidKeyError:\\
+            \t\\- The dictionary key (\'{no_matching_key}\') does not match any expected match option key(s).
         """
         self._required_keys = required_keys
         self._all_key_check = True
@@ -103,6 +117,17 @@ class KeyCheck():
     def _key_validation(self) -> None:
         """
         Performs the key validation.
+
+        Raises:
+            AttributeError:\\
+            \t\\- No key(s) were sent.
+            AttributeError:\\
+            \t\\- The input keys have inconsistent value and requirement keys.\\
+            AttributeError:\\
+            \t\\- The required key list contains duplicate keys. All keys must be unique.\\
+            InvalidKeyError:\\
+            \t\\- The dictionary key (\'{no_matching_key}\')\\
+            \t  does not exist in the expected required key(s).
         """
         # Loops through to find any keys that do not match.
         dict_keys = list(self._values.keys())
@@ -114,6 +139,32 @@ class KeyCheck():
         else:
             expected_keys = self._required_keys
             required_keys = dict_keys
+
+        # Checks for that required keys are sent.
+        if not required_keys:
+            # Formats the output based on the check option.
+            if self._all_key_check:
+                expected_result = f'  - Expected Key(s) = {expected_keys}'
+            else:
+                expected_result = f'  - Expected Match Option Key(s) = {expected_keys}'
+
+            error_message = (
+                f'No key(s) were sent.\n'
+                + (('-' * 150) + '\n')
+                + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n')
+                + (('-' * 150) + '\n')
+                + 'Returned Result:\n'
+                f'{expected_result}\n\n'
+                'Returned Result:\n'
+                f'  - None\n\n'
+                + f'Trace Details:\n'
+                f'  - Exception: AttributeError\n'
+                f'  - Module: {self._caller_module}\n'
+                f'  - Name: {self._caller_name}\n'
+                f'  - Line: {self._caller_line}\n'
+                + (('-' * 150) + '\n') * 2
+            )
+            raise AttributeError(error_message)
 
         # Checks for 1:1 input when using the all_keys option.
         if self._all_key_check:
@@ -132,7 +183,9 @@ class KeyCheck():
             if mismatched_input is True:
                 error_message = (
                     f'The input keys have inconsistent value and requirement keys.\n'
-                    + (('-' * 150) + '\n') + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n') + (('-' * 150) + '\n')
+                    + (('-' * 150) + '\n')
+                    + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n')
+                    + (('-' * 150) + '\n')
                     + 'Expected Result:\n'
                     f'  - Required Key(s) = {expected_keys}\n\n'
                     'Returned Result:\n'
@@ -153,9 +206,11 @@ class KeyCheck():
             if len(required_keys) != len(set(required_keys)):
                 error_message = (
                     f'The required key list contains duplicate keys. All keys must be unique.\n'
-                    + (('-' * 150) + '\n') + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n') + (('-' * 150) + '\n')
+                    + (('-' * 150) + '\n')
+                    + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n')
+                    + (('-' * 150) + '\n')
                     + 'Returned Result:\n'
-                    f'  - Required Keys = {required_keys}\n\n'
+                    f'  - Required Key(s) = {required_keys}\n\n'
                     + f'Trace Details:\n'
                     f'  - Exception: AttributeError\n'
                     f'  - Module: {self._caller_module}\n'
@@ -169,9 +224,11 @@ class KeyCheck():
             if len(expected_keys) != len(set(expected_keys)):
                 error_message = (
                     f'The expected key list contains duplicate keys. All keys must be unique.\n'
-                    + (('-' * 150) + '\n') + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n') + (('-' * 150) + '\n')
+                    + (('-' * 150) + '\n')
+                    + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n')
+                    + (('-' * 150) + '\n')
                     + 'Returned Result:\n'
-                    f'  - Required Keys = {expected_keys}\n\n'
+                    f'  - Expected Key(s) = {expected_keys}\n\n'
                     + f'Trace Details:\n'
                     f'  - Exception: AttributeError\n'
                     f'  - Module: {self._caller_module}\n'
@@ -222,17 +279,21 @@ class KeyCheck():
         if no_matching_key:
             # Formats the output based on the check option.
             if self._all_key_check:
-                main_message = f'The dictionary key (\'{no_matching_key}\') does not exist in the expected required key(s).\n'
-                expected_result = f'  - Required Key(s) = {expected_keys}'
+                main_message = (f'The dictionary key (\'{no_matching_key}\') '
+                                'does not exist in the expected required key(s).\n')
+                expected_result = f'  - Expected Key(s) = {expected_keys}'
                 returned_result = f'  - Failed Key(s) = {required_keys}'
             else:
-                main_message = f'The dictionary key (\'{no_matching_key}\') does not match any expected match option key(s).\n'
+                main_message = (f'The dictionary key (\'{no_matching_key}\') '
+                                'does not match any expected match option key(s).\n')
                 expected_result = f'  - Match Option Key(s) = {expected_keys}'
                 returned_result = f'  - Failed Key(s) = {required_keys}'
 
             error_message = (
                 f'{main_message}'
-                + (('-' * 150) + '\n') + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n') + (('-' * 150) + '\n')
+                + (('-' * 150) + '\n')
+                + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n')
+                + (('-' * 150) + '\n')
                 + 'Expected Result:\n'
                 f'{expected_result}\n\n'
                 'Returned Result:\n'
@@ -245,3 +306,4 @@ class KeyCheck():
                 + (('-' * 150) + '\n') * 2
             )
             raise InvalidKeyError(error_message)
+  

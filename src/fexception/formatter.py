@@ -5,15 +5,19 @@ from .util import get_line_number
 
 def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_args: ExceptionArgs) -> str:
     """
-    The exception formatter creates consistent clean exception output. No logging will take place within this function.\\
-    The exception output will have an origination location based on the exception section. Any formatted raised exceptions \\
-    will originate from the calling function. All local function or Attribute errors will originate from this function.
+    The exception formatter creates consistent clean exception output.
+    No logging will take place within this function.\\
+    The exception output will have an origination location based on the exception section.\\
+    Any formatted raised exceptions will originate from the calling function.\\
+    All local function or Attribute errors will originate from this function.
 
     The user can override the exception type from the general custom exception module classes above.
 
     Args:
-        processed_message_args (ProcessedMessageArgs): Message args to populate the formatted exception message.
-        exception_args (ExceptionArgs): Exception args to populate the formatted exception message.
+        processed_message_args (ProcessedMessageArgs):\\
+        \t\\- Message args to populate the formatted exception message.
+        exception_args (ExceptionArgs):
+        \t\\- Exception args to populate the formatted exception message.
     """
     try:
         caller_module = exception_args.caller_module
