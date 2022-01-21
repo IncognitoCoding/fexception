@@ -55,7 +55,7 @@ caller_override: <br />
 | line                        | int           | no		   | The override line number.                                                            |
 | tb_remove                   | str           | no		   | The traceback module name that needs to be removed.			                            |
 
-Examples
+Usage Examples
 ============
 ### Example1:
 Normal exception raise.
@@ -96,6 +96,30 @@ Exception raise with adjusted traceback.
       'tb_remove': 'helpers',
     }
     raise FValueError(exec_args, None, caller_override)
+
+Formatted Exception Message Example
+===================================
+
+    FValueError: A problem occurred while checking the variable type.
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    -----------------------------------------------------------------Additional Information---------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    Expected Result:
+      - A <class 'str'> was sent.
+
+    Returned Result:
+      - An <class 'int'>
+
+    Suggested Resolution:
+      - Check input variable.
+
+    Trace Details:
+      - Exception: FValueError
+      - Module: utility
+      - Name: type_validate
+      - Line: 40
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Installation
 ============
