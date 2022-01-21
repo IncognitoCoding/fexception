@@ -111,7 +111,7 @@ Formatted Exception Message Example
       - A <class 'str'> was sent.
 
     Returned Result:
-      - An <class 'int'>
+      - A <class 'int'>.
 
     Suggested Resolution:
       - Check input variable.
