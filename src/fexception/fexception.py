@@ -41,6 +41,7 @@ class ExceptionProcessor:
         try:
             self._processed_message_args = ConvertArgs(message_args, exception_args).set_message_args()
             self._processed_override_args = ConvertArgs(message_args, exception_args).set_override_args()
+
             # Checks if override args are set.
             if 'module=None, name=None, line=None' not in str(self._processed_override_args):
                 # Updates the ExceptionArgs dataclass args with the override values.
@@ -139,7 +140,7 @@ class ConvertArgs(ExceptionProcessor):
                                  self._caller_module,
                                  self._caller_name,
                                  self._caller_line)
-            key_check.contains_keys(importing_exception_keys, reverse=True)
+            key_check.contains_keys(importing_exception_keys, reverse_output=True)
 
             main_message = self._message_args.get('main_message')
             expected_result = self._message_args.get('expected_result')
@@ -183,7 +184,7 @@ class ConvertArgs(ExceptionProcessor):
                                      self._caller_module,
                                      self._caller_name,
                                      self._caller_line)
-                key_check.all_keys(importing_exception_keys, reverse=True)
+                key_check.all_keys(importing_exception_keys, reverse_output=True)
 
                 # Gets the dictionary values to set the overide arg
                 module = self._caller_override.get('module')
@@ -240,7 +241,7 @@ class SetExceptionHook(ExceptionProcessor):
         Supports limited traceback output.
 
         Supports traceback module removal.
-    
+
         Args:
             hook_args (HookArgs):\\
             \t\\- The formatted excpetion message and exception args.
@@ -299,7 +300,7 @@ class SetExceptionHook(ExceptionProcessor):
             or hook_args.exception_args.caller_override is not None
         ):
             sys.excepthook = except_hook
-
+    
 # ########################################################
 # #################Base Exception Classes#################
 # ########################################################
@@ -4551,11 +4552,17 @@ class FCustomException(Exception):
                                      Path(inspect.currentframe().f_back.f_code.co_filename).stem,
                                      inspect.currentframe().f_back.f_code.co_name,
                                      inspect.currentframe().f_back.f_lineno)
-                key_check.contains_keys(importing_exception_keys)
+                key_check.contains_keys(importing_exception_keys, reverse_output=True)
             except Exception as exec:
                 raise InputFailure(exec)
 
-            custom_type = message_args.get('custom_type')
+            # Adjusted the tb_limit from None to a number.
+            # None numbers will not run through the except_hook function
+            # because that option returns all output. This adjusted the value
+            # to a high value to run it through the except_hook function to change
+            # the Exception from FCustomException to the custom exception.
+            if tb_limit is None:
+                tb_limit = 1000
             # Deletes the custom key and value from the message_args because this key is not allowed through other validations.
             del message_args['custom_type']
             self._formatted_exception = ExceptionProcessor(message_args,
