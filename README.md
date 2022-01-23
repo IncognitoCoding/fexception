@@ -38,7 +38,7 @@ fexception offers two custom argument options to adjust the traceback output. Th
 
 tb_limit: <br />
   - The first option allows the traceback to be limited by the index point. If you want no traceback, you can set it to 0, or if you wish to see the first two lines, you can select the value to 2. The default value is None, which prints all available traceback detail.
-  - The tb_limit can be set with a number value.
+  - Setting the tb_limit to zero will remove the "Trace Details" from the exception message. Nested exceptions will still contain "Trace Details". This option may be ideal for an end user-facing message for a specific error.
 
 
 caller_override: <br />
@@ -63,30 +63,30 @@ Usage Examples
 ### Example1:
 Normal exception raise.
 
-    exec_args = {
+    exc_args = {
       'main_message': 'Incorrect value was sent.',
       'expected_result': '5',
       'returned_result': '2',
       'suggested_resolution': 'Check the input source.',
     }
-    raise FValueError(exec_args)
+    raise FValueError(exc_args)
 
 ### Example2:
 Exception raise with a custom exception class.<br />
 
-    exec_args = {
+    exc_args = {
       'main_message': 'Incorrect value was sent.',
       'expected_result': '5',
       'returned_result': '2',
       'suggested_resolution': 'Check the input source.',
       'custom_type': MySampleException,
     }
-    raise FCustomException(exec_args)
+    raise FCustomException(exc_args)
 
 ### Example3:
 Exception raise with adjusted traceback.
 
-    exec_args = {
+    exc_args = {
       'main_message': 'Incorrect value was sent.',
       'expected_result': '5',
       'returned_result': '2',
@@ -98,32 +98,178 @@ Exception raise with adjusted traceback.
       'line': 90,
       'tb_remove': 'helpers',
     }
-    raise FValueError(exec_args, None, caller_override)
+    raise FValueError(exc_args, None, caller_override)
 
-Formatted Exception Message Example
-===================================
+Formatted Exception Message Examples
+====================================
+
+### Example1 (tb_limit=0):
 
     FValueError: A problem occurred while checking the variable type.
     ------------------------------------------------------------------------------------------------------------------------------------------------------
     -----------------------------------------------------------------Additional Information---------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------------------------------------
     Expected Result:
-      - A <class 'str'> was sent.
+      - A <class 'str'>.
 
     Returned Result:
-      - A <class 'int'>.
+      - A <class 'int'> was sent.
+
+    Suggested Resolution:
+      - Check input variable.
+
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+### Example2 (tb_limit=None or tb_limit=1):
+
+    Traceback (most recent call last):
+      File "C:\fexception\tests\test_fexceptions.py", line 26, in <module>
+        raise FValueError(exc_args)
+    FValueError: A problem occurred while checking the variable type.
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    -----------------------------------------------------------------Additional Information---------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    Expected Result:
+      - A <class 'str'>.
+
+    Returned Result:
+      - A <class 'int'> was sent.
 
     Suggested Resolution:
       - Check input variable.
 
     Trace Details:
       - Exception: FValueError
-      - Module: utility
-      - Name: type_validate
-      - Line: 40
+      - Module: test_fexceptions
+      - Name: __main__
+      - Line: 26
     ------------------------------------------------------------------------------------------------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------------------------------------
 
+### Nested Example1 (tb_limit=0):
+
+    FValueError: A problem occurred in the nested example.
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    -----------------------------------------------------------------Additional Information---------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    Nested Exception:
+
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Start Original Exception~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+                A problem occurred while checking the variable type.
+                ------------------------------------------------------------------------------------------------------------------------------------------------------
+                -----------------------------------------------------------------Additional Information---------------------------------------------------------------
+                ------------------------------------------------------------------------------------------------------------------------------------------------------
+                Expected Result:
+                  - A <class 'str'>.
+
+                Returned Result:
+                  - A <class 'int'> was sent.
+
+                Suggested Resolution:
+                  - Check input variable.
+
+                Trace Details:
+                  - Exception: FValueError
+                  - Module: test_fexceptions
+                  - Name: __main__
+                  - Line: 27
+                ------------------------------------------------------------------------------------------------------------------------------------------------------
+                ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~End Original Exception~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Suggested Resolution:
+      - Please check that you entered the correct input variable.
+
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+### Nested Example2 (tb_limit=None):
+
+    Traceback (most recent call last):
+      File "C:\GitHub_Repositories\fexception\tests\test_fexceptions.py", line 27, in <module>
+        raise FValueError(exc_args)
+    FValueError: A problem occurred while checking the variable type.
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    -----------------------------------------------------------------Additional Information---------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    Expected Result:
+      - A <class 'str'>.
+
+    Returned Result:
+      - A <class 'int'> was sent.
+
+    Suggested Resolution:
+      - Check input variable.
+
+    Trace Details:
+      - Exception: FValueError
+      - Module: test_fexceptions
+      - Name: __main__
+      - Line: 27
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "C:\GitHub_Repositories\fexception\tests\test_fexceptions.py", line 34, in <module>
+        raise FValueError(exc_args)
+    FValueError: A problem occurred in the nested example.
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    -----------------------------------------------------------------Additional Information---------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    Nested Exception:
+
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Start Original Exception~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+                A problem occurred while checking the variable type.
+                ------------------------------------------------------------------------------------------------------------------------------------------------------
+                -----------------------------------------------------------------Additional Information---------------------------------------------------------------
+                ------------------------------------------------------------------------------------------------------------------------------------------------------
+                Expected Result:
+                  - A <class 'str'>.
+
+                Returned Result:
+                  - A <class 'int'> was sent.
+
+                Suggested Resolution:
+                  - Check input variable.
+
+                Trace Details:
+                  - Exception: FValueError
+                  - Module: test_fexceptions
+                  - Name: __main__
+                  - Line: 27
+                ------------------------------------------------------------------------------------------------------------------------------------------------------
+                ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~End Original Exception~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Suggested Resolution:
+      - Please check that you entered the correct input variable.
+
+    Trace Details:
+      - Exception: FValueError
+      - Module: test_fexceptions
+      - Name: __main__
+      - Line: 34
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------
+  
 Installation
 ============
 
