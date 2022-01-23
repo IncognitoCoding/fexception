@@ -20,12 +20,6 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
         \t\\- Exception args to populate the formatted exception message.
     """
     try:
-        caller_module = exception_args.caller_module
-        caller_name = exception_args.caller_name
-        if str(caller_name) == '<module>':
-            caller_name = '__main__'
-        caller_line = exception_args.caller_line
-
         # #################################################
         # ###########Formats Lists or Str Output###########
         # #################################################
@@ -68,11 +62,30 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
             formatted_returned_result = ''
 
         if processed_message_args.original_exception:
-            nested_module = Path(processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_filename).stem
-            nested_name = processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_name
-            if str(nested_name) == '<module>':
-                nested_name = '__main__'
-            nested_line = processed_message_args.original_exception.__traceback__.tb_lineno
+            # Checks if the nested exception is previously formatted.
+            # Previously formatted exceptions will not have the nested trace details added.
+            if (
+                'Nested Trace Details:' in str(processed_message_args.original_exception)
+                and 'Exception:' in str(processed_message_args.original_exception)
+            ):
+                nested_module = Path(processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_filename).stem
+                nested_name = processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_name
+                if str(nested_name) == '<module>':
+                    nested_name = '__main__'
+                nested_line = processed_message_args.original_exception.__traceback__.tb_lineno
+
+                # Sets the trace details even if the limit is 0.
+                # Without the trace details, the nested message would be useless with a limit of 0.
+                formatted_nested_trace_details = (
+                    f'{formatted_original_exception}\n\n'
+                    f'            Nested Trace Details:\n'
+                    f'              - Exception: {type(processed_message_args.original_exception).__name__}\n'
+                    f'              - Module: {nested_module}\n'
+                    f'              - Name: {nested_name}\n'
+                    f'              - Line: {nested_line}\n'
+                )
+            else:
+                formatted_nested_trace_details = ''
 
             formatted_original_exception = ('Nested Exception:\n\n'
                                             + '            '
@@ -80,11 +93,7 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
                                             + (('~' * 63) + 'Start Original Exception' + ('~' * 63) + '\n            ')
                                             + (('~' * 150) + '\n            \n')
                                             + f'{formatted_original_exception}\n\n'
-                                            + f'            Nested Trace Details:\n'
-                                            + f'              - Exception: {type(processed_message_args.original_exception).__name__}\n'
-                                            + f'              - Module: {nested_module}\n'
-                                            + f'              - Name: {nested_name}\n'
-                                            + f'              - Line: {nested_line}\n'
+                                            + formatted_nested_trace_details
                                             + '            ' + (('~' * 150) + '\n            ')
                                             + (('~' * 65) + 'End Original Exception' + ('~' * 63) + '\n            ')
                                             + (('~' * 150) + '\n            \n'))
@@ -97,6 +106,20 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
         else:
             formatted_suggested_resolution = ''
 
+        # Sets the trace details if the limit is anything other than 0.
+        if exception_args.tb_limit != 0:
+            caller_name = exception_args.caller_name
+            if str(caller_name) == '<module>':
+                caller_name = '__main__'
+
+            formatted_trace_details = ('Trace Details:\n'
+                                       f'  - Exception: {exception_args.exception_type.__name__}\n'
+                                       f'  - Module: {exception_args.caller_module}\n'
+                                       f'  - Name: {caller_name}\n'
+                                       f'  - Line: {exception_args.caller_line}\n')
+        else:
+            formatted_trace_details = ''
+
         exception_message = (
             formatted_main_message
             + (('-' * 150) + '\n')
@@ -106,17 +129,13 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
             + formatted_returned_result
             + formatted_original_exception
             + formatted_suggested_resolution
-            + f'Trace Details:\n'
-            f'  - Exception: {exception_args.exception_type.__name__}\n'
-            f'  - Module: {caller_module}\n'
-            f'  - Name: {caller_name}\n'
-            f'  - Line: {caller_line}\n'
+            + formatted_trace_details
             + (('-' * 150) + '\n') * 2
         )
         return exception_message
-    except Exception as exec:
+    except Exception as exc:
         # Converts the error into a formatted string with tab spacing.
-        original_exception = str('\n            ' + '\n            '.join(map(str, str(exec).splitlines())))
+        original_exception = str('\n            ' + '\n            '.join(map(str, str(exc).splitlines())))
         exception_message = (
             f'A general error has occurred while formatting the exception message.\n'
             + (('-' * 150) + '\n') + (('-' * 65) + 'Additional Information' + ('-' * 63) + '\n') + (('-' * 150) + '\n')
@@ -125,10 +144,10 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
             + '            ' + (('~' * 150) + '\n            ') + (('~' * 63) + 'Start Original Exception' + ('~' * 63) + '\n            ') + (('~' * 150) + '\n            \n')
             + f'{original_exception}\n\n'
             + f'            Nested Trace Details:\n'
-            + f'              - Exception: {type(exec).__name__}\n'
-            + f'              - Module: {Path(exec.__traceback__.tb_frame.f_code.co_filename).stem}\n'
-            + f'              - Name: {exec.__traceback__.tb_frame.f_code.co_name}\n'
-            + f'              - Line: {exec.__traceback__.tb_lineno}\n'
+            + f'              - Exception: {type(exc).__name__}\n'
+            + f'              - Module: {Path(exc.__traceback__.tb_frame.f_code.co_filename).stem}\n'
+            + f'              - Name: {exc.__traceback__.tb_frame.f_code.co_name}\n'
+            + f'              - Line: {exc.__traceback__.tb_lineno}\n'
             + '            ' + (('~' * 150) + '\n            ') + (('~' * 65) + 'End Original Exception' + ('~' * 63) + '\n            ') + (('~' * 150) + '\n            \n\n')
             + f'Trace Details:\n'
             f'  - Exception: Exception\n'

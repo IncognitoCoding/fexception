@@ -1,8 +1,6 @@
-import traceback
 import pytest
 
-from fexception import FCustomException, FValueError
-from fexception.fexception import FException
+from fexception import FCustomException, FValueError, FTypeError
 from nested import type_validate_override, type_validate_no_override
 
 
@@ -27,17 +25,54 @@ def test_1_nested_override():
     This is a less common usage, but may be used for anyone creating custom validation
     modules that do not need to report traceback information.
 
-    The adjusted traceback print can not be tested because the nested traceback, but the user
-    gets the limited traceback in the console. This tests to make sure the formatted message
+    Tests if the "Trace Details" being added into the exception message.
+
+    The adjusted traceback print can not be tested on the nested traceback because pytest
+    prints the original traceback details. This tests to make sure the formatted message
     has the correct override output.
     """
     try:
         type_validate_override()
-    except Exception as exec:
-        tb_output = traceback.format_exception(type(exec), exec, exec.__traceback__)
-        assert 'Exception: FValueError' in str(tb_output)
-        assert 'Module: test_fexceptions' in str(tb_output)
-        assert 'Name: test_1_nested_override' in str(tb_output)
+    except Exception as exc:
+        assert 'Exception: FTypeError' in str(exc)
+        assert 'Module: test_fexceptions' in str(exc)
+        assert 'Name: test_1_nested_override' in str(exc)
+
+        # Checks that Trace Details returns.
+        try:
+            exc_args = {
+                'main_message': 'Problem with the construction project.',
+                'original_exception': exc
+            }
+            raise FTypeError(exc_args)
+        except Exception as exc1:
+            assert 'Problem with the construction project.' in str(exc1)
+            assert '- Name:' in str(exc1).split('\n')[-5]
+            assert '- Line:' in str(exc1).split('\n')[-4]
+
+        # Checks that Trace Details returns.
+        try:
+            exc_args = {
+                'main_message': 'Problem with the construction project.',
+                'original_exception': exc
+            }
+            raise FTypeError(exc_args, tb_limit=2)
+        except Exception as exc1:
+            assert 'Problem with the construction project.' in str(exc1)
+            assert '- Name:' in str(exc1).split('\n')[-5]
+            assert '- Line:' in str(exc1).split('\n')[-4]
+
+        # Checks that Trace Details does not return.
+        try:
+            exc_args = {
+                'main_message': 'Problem with the construction project.',
+                'original_exception': exc
+            }
+            raise FTypeError(exc_args, tb_limit=0)
+        except Exception as exc2:
+            assert 'Problem with the construction project.' in str(exc2)
+            assert '- Name:' not in str(exc2).split('\n')[-5]
+            assert '- Line:' not in str(exc2).split('\n')[-4]
 
 
 def test_1_nested_no_override():
@@ -46,12 +81,11 @@ def test_1_nested_no_override():
     """
     try:
         type_validate_no_override()
-    except Exception as exec:
-        tb_output = traceback.format_exception(type(exec), exec, exec.__traceback__)
-        assert 'Exception: FValueError' in str(tb_output)
-        assert 'Module: nested' in str(tb_output)
-        assert 'Name: type_validate_no_override' in str(tb_output)
-        assert 'nested.py' in str(tb_output)
+    except Exception as exc:
+        assert 'Exception: FTypeError' in str(exc)
+        assert 'Module: nested' in str(exc)
+        assert 'Name: type_validate_no_override' in str(exc)
+        assert 'Module: nested' in str(exc)
 
 
 def test_1_FValueError():
@@ -59,13 +93,13 @@ def test_1_FValueError():
     Tests formatting a standard exception.
     """
     with pytest.raises(Exception) as excinfo:
-        exec_args = {
+        exc_args = {
             'main_message': 'Problem with the construction project.',
             'expected_result': 'A door',
             'returned_result': 'A window',
             'suggested_resolution': 'Call contractor',
         }
-        raise FValueError(exec_args)
+        raise FValueError(exc_args)
     assert 'Problem with the construction project.' in str(excinfo.value)
     assert 'A door' in str(excinfo.value)
     assert 'A window' in str(excinfo.value)
@@ -79,11 +113,11 @@ def test_1_FCustomException():
     Tests formatting a custom type exception.
     """
     with pytest.raises(Exception) as excinfo:
-        exec_args = {
+        exc_args = {
             'main_message': 'Testing the FCustomException exception.',
             'custom_type': MySampleException,
         }
-        raise FCustomException(exec_args)
+        raise FCustomException(exc_args)
     assert 'Testing the FCustomException exception.' in str(excinfo.value)
     assert 'Exception: MySampleException' in str(excinfo.value)
 
@@ -97,23 +131,23 @@ def test_2_FCustomException():
     Tests an incorrect custom type exception.
     """
     with pytest.raises(Exception) as excinfo:
-        exec_args = {
+        exc_args = {
             'main_message': 'This is my test error message.',
             'custom_type': 'BAD VALUE ERROR',
         }
-        raise FCustomException(exec_args)
+        raise FCustomException(exc_args)
     assert 'A pre-configured exception' in str(excinfo.value)
 
 
 def test_2_FValueError():
     """
-    Tests a bad input key in teh exec_args dictionary.
+    Tests a bad input key in teh caller_override dictionary.
     """
     with pytest.raises(Exception) as excinfo:
-        exec_args = {
+        exc_args = {
             'bad_key': 'Problem with the construction project.',
         }
-        raise FValueError(exec_args)
+        raise FValueError(exc_args)
     assert 'does not match any expected match option key' in str(excinfo.value)
 
 
@@ -122,9 +156,9 @@ def test_2_1_FValueError():
     Tests no keys.
     """
     with pytest.raises(Exception) as excinfo:
-        exec_args = {
+        exc_args = {
         }
-        raise FValueError(exec_args)
+        raise FValueError(exc_args)
     assert 'No key(s) were sent.' in str(excinfo.value)
 
 
@@ -133,7 +167,7 @@ def test_2_2_FValueError():
     Tests removing the key tb_remove to trigger the failure.
     """
     with pytest.raises(Exception) as excinfo:
-        exec_args = {
+        exc_args = {
             'main_message': 'Sample nested failure.',
             'expected_result': 'Sample 1',
             'returned_result': 'Sample 2',
@@ -144,7 +178,7 @@ def test_2_2_FValueError():
             'name': 'sample',
             'line': 1000,
         }
-        raise FValueError(exec_args, None, caller_override)
+        raise FValueError(exc_args, None, caller_override)
     assert 'The input keys have inconsistent value and requirement keys' in str(excinfo.value)
 
 
@@ -153,7 +187,7 @@ def test_2_3_FValueError():
     Tests a bad input key in teh caller_override dictionary.
     """
     with pytest.raises(Exception) as excinfo:
-        exec_args = {
+        exc_args = {
             'main_message': 'Sample nested failure.',
             'expected_result': 'Sample 1',
             'returned_result': 'Sample 2',
@@ -165,5 +199,5 @@ def test_2_3_FValueError():
             'line': 1000,
             'bad_key': 'my_sample'
         }
-        raise FValueError(exec_args, None, caller_override)
+        raise FValueError(exc_args, None, caller_override)
     assert """The dictionary key ('bad_key') does not exist in the expected required key(s)""" in str(excinfo.value)

@@ -53,25 +53,46 @@ class ExceptionProcessor:
                                                      caller_line=self._processed_override_args.line)
             # Formats the exception message based on the args.
             self._formatted_exception = exception_formatter(self._processed_message_args, exception_args)
+
+            # Nested override exception detection.
+            if self._processed_message_args.original_exception:
+                # Checks if the nested exception is nested with an override to change the return style.
+                # If the nested message has the matching last traceback it means the message was overridden.
+                # An overridden exception requires the sys.excepthook to get called or the messsage will be empty when re-raised.
+                nested_module = Path(self._processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_filename).stem
+                nested_name = self._processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_name
+                nested_line = self._processed_message_args.original_exception.__traceback__.tb_lineno
+                if (
+                    exception_args.tb_limit is None
+                    and f'Module: {nested_module}' in str(self._processed_message_args.original_exception)
+                    and f'Name: {nested_name}' in str(self._processed_message_args.original_exception)
+                    and f'Line: {nested_line}' in str(self._processed_message_args.original_exception)
+                ):
+                    # Changes the tb_limit from None to 1000, to force the formatted exception to run
+                    # through the sys.excepthook call.
+                    # Using the override will restrict a full trackback return to the most recent call.
+                    exception_args = dataclasses.replace(exception_args,
+                                                         tb_limit=1000)
+
             self._exception_args = exception_args
-        except InputFailure as exec:
+        except InputFailure as exc:
             # Updates the selected exception_type to the internal exception error.
             exception_args = dataclasses.replace(exception_args, exception_type=InputFailure)
             exception_args = dataclasses.replace(exception_args, tb_limit=None)
             exception_args = dataclasses.replace(exception_args, caller_override=None)
             # Sets formatted exception to the internal exception error.
-            self._formatted_exception = exec
+            self._formatted_exception = exc
             self._exception_args = exception_args
-            SetLocalExceptionHook(HookArgs(formatted_exception=exec, exception_args=self._exception_args))
-        except ErrorFormatFailure as exec:
+            SetLocalExceptionHook(HookArgs(formatted_exception=exc, exception_args=self._exception_args))
+        except ErrorFormatFailure as exc:
             # Updates the selected exception_type to the internal exception error.
             exception_args = dataclasses.replace(exception_args, exception_type=ErrorFormatFailure)
             exception_args = dataclasses.replace(exception_args, tb_limit=None)
             exception_args = dataclasses.replace(exception_args, caller_override=None)
             # Sets formatted exception to the internal exception error.
-            self._formatted_exception = exec
+            self._formatted_exception = exc
             self._exception_args = exception_args
-            SetLocalExceptionHook(HookArgs(formatted_exception=exec, exception_args=self._exception_args))
+            SetLocalExceptionHook(HookArgs(formatted_exception=exc, exception_args=self._exception_args))
         else:
             SetExceptionHook(HookArgs(formatted_exception=self._formatted_exception,
                                       exception_args=self._exception_args))
@@ -147,8 +168,8 @@ class ConvertArgs(ExceptionProcessor):
             returned_result = self._message_args.get('returned_result')
             suggested_resolution = self._message_args.get('suggested_resolution')
             original_exception = self._message_args.get('original_exception')
-        except (AttributeError, InvalidKeyError) as exec:
-            raise InputFailure(exec)
+        except (AttributeError, InvalidKeyError) as exc:
+            raise InputFailure(exc)
         else:
             return ProcessedMessageArgs(
                 main_message=main_message,
@@ -190,8 +211,8 @@ class ConvertArgs(ExceptionProcessor):
                 module = self._caller_override.get('module')
                 name = self._caller_override.get('name')
                 line = self._caller_override.get('line')
-            except (AttributeError, InvalidKeyError) as exec:
-                raise InputFailure(exec)
+            except (AttributeError, InvalidKeyError) as exc:
+                raise InputFailure(exc)
             else:
                 return ProcessedOverrideArgs(
                     module=module,
@@ -295,12 +316,13 @@ class SetExceptionHook(ExceptionProcessor):
                                           limit=self._tb_limit, chain=True)
 
         # Checks if a tb_limit is set or caller_override is enabled.
+        # Skipped when full traceback (tb_limit=None) needs to be displayed.
         if (
             self._tb_limit is not None
             or hook_args.exception_args.caller_override is not None
         ):
             sys.excepthook = except_hook
-    
+
 # ########################################################
 # #################Base Exception Classes#################
 # ########################################################
@@ -4553,8 +4575,8 @@ class FCustomException(Exception):
                                      inspect.currentframe().f_back.f_code.co_name,
                                      inspect.currentframe().f_back.f_lineno)
                 key_check.contains_keys(importing_exception_keys, reverse_output=True)
-            except Exception as exec:
-                raise InputFailure(exec)
+            except Exception as exc:
+                raise InputFailure(exc)
 
             # Adjusted the tb_limit from None to a number.
             # None numbers will not run through the except_hook function

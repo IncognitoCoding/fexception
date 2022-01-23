@@ -1,7 +1,7 @@
 """
 Sample for nested test.
 """
-from fexception import FValueError
+from fexception import FTypeError
 import inspect
 from pathlib import Path
 
@@ -11,7 +11,7 @@ def type_validate_override():
     x = 'Z'
 
     if not isinstance(x, int):
-        exec_args = {
+        exc_args = {
             'main_message': 'Sample problem with the nested module.',
             'expected_result': f'A {type(x)} was sent.',
             'returned_result': 'An <class \'int\'>',
@@ -23,7 +23,7 @@ def type_validate_override():
             'line': inspect.currentframe().f_back.f_lineno,
             'tb_remove': 'nested'
         }
-        raise FValueError(exec_args, None, caller_override)
+        raise FTypeError(exc_args, tb_limit=None, caller_override=caller_override)
 
 
 def type_validate_no_override():
@@ -31,10 +31,10 @@ def type_validate_no_override():
     x = 'Z'
 
     if not isinstance(x, int):
-        exec_args = {
+        exc_args = {
             'main_message': 'Sample problem with the nested module.',
             'expected_result': f'A {type(x)} was sent.',
             'returned_result': 'An <class \'int\'>',
             'suggested_resolution': 'Check input variable.'
         }
-        raise FValueError(exec_args)
+        raise FTypeError(exc_args)
