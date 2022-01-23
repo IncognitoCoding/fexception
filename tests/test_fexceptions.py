@@ -178,7 +178,7 @@ def test_2_2_FValueError():
             'name': 'sample',
             'line': 1000,
         }
-        raise FValueError(exc_args, None, caller_override)
+        raise FValueError(exc_args, tb_limit=None, caller_override=caller_override)
     assert 'The input keys have inconsistent value and requirement keys' in str(excinfo.value)
 
 
@@ -199,5 +199,5 @@ def test_2_3_FValueError():
             'line': 1000,
             'bad_key': 'my_sample'
         }
-        raise FValueError(exc_args, None, caller_override)
+        raise FValueError(exc_args, tb_limit=None, caller_override=caller_override)
     assert """The dictionary key ('bad_key') does not exist in the expected required key(s)""" in str(excinfo.value)
