@@ -42,22 +42,22 @@ class ProcessedMessageArgs:
     Args:
         main_message (str):\\
         \t\\- The main exception message.\\
-        expected_result (Union[str, list], Optional):\\
+        expected_result (Union[str, list], optional):\\
         \t\\- The expected result.\\
         \t\t\\- str vs list:
         \t\t\t\\- A string will be a single formatted line.\\
         \t\t\t\\- A list will be split into individual formatted lines.\\
-        returned_result (Union[str, list], Optional):\\
+        returned_result (Union[str, list], optional):\\
         \t\\- The returned result.\\
         \t\t\\- str vs list:
         \t\t\t\\- A string will be a single formatted line.\\
         \t\t\t\\- A list will be split into individual formatted lines.\\
-        suggested_resolution (Union[str, list], Optional):\\
+        suggested_resolution (Union[str, list], optional):\\
         \t\\- A suggested resolution.\\
         \t\t\\- str vs list:
         \t\t\t\\- A string will be a single formatted line.\\
         \t\t\t\\- A list will be split into individual formatted lines.\\
-        original_exception (any, Optional):\\
+        original_exception (any, optional):\\
         \t\\- The original exception.
     """
     __slots__ = ("main_message", "expected_result", "returned_result",

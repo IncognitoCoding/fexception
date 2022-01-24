@@ -342,10 +342,10 @@ class FKBaseException(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -353,13 +353,13 @@ class FKBaseException(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -403,10 +403,10 @@ class FException(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -414,13 +414,13 @@ class FException(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -464,10 +464,10 @@ class FArithmeticError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -475,13 +475,13 @@ class FArithmeticError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -525,10 +525,10 @@ class FBufferError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -536,13 +536,13 @@ class FBufferError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -586,10 +586,10 @@ class FLookupError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -597,13 +597,13 @@ class FLookupError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -652,10 +652,10 @@ class FAssertionError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -663,13 +663,13 @@ class FAssertionError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -713,10 +713,10 @@ class FAttributeError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -724,13 +724,13 @@ class FAttributeError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -774,10 +774,10 @@ class FEOFError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -785,13 +785,13 @@ class FEOFError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -835,10 +835,10 @@ class FFloatingPointError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -846,13 +846,13 @@ class FFloatingPointError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -896,10 +896,10 @@ class FGeneratorExit(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -907,13 +907,13 @@ class FGeneratorExit(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -957,10 +957,10 @@ class FImportError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -968,13 +968,13 @@ class FImportError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1018,10 +1018,10 @@ class FModuleNotFoundError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1029,13 +1029,13 @@ class FModuleNotFoundError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1079,10 +1079,10 @@ class FIndexError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1090,13 +1090,13 @@ class FIndexError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1140,10 +1140,10 @@ class FKeyError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1151,13 +1151,13 @@ class FKeyError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1201,10 +1201,10 @@ class FKeyboardInterrupt(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1212,13 +1212,13 @@ class FKeyboardInterrupt(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1262,10 +1262,10 @@ class FMemoryError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1273,13 +1273,13 @@ class FMemoryError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1323,10 +1323,10 @@ class FNameError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1334,13 +1334,13 @@ class FNameError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1384,10 +1384,10 @@ class FNotImplementedError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1395,13 +1395,13 @@ class FNotImplementedError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1445,10 +1445,10 @@ class FOSError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1456,13 +1456,13 @@ class FOSError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1506,10 +1506,10 @@ class FOverflowError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1517,13 +1517,13 @@ class FOverflowError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1567,10 +1567,10 @@ class FRecursionError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1578,13 +1578,13 @@ class FRecursionError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1628,10 +1628,10 @@ class FReferenceError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1639,13 +1639,13 @@ class FReferenceError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1689,10 +1689,10 @@ class FRuntimeError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1700,13 +1700,13 @@ class FRuntimeError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1750,10 +1750,10 @@ class FStopIteration(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1761,13 +1761,13 @@ class FStopIteration(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1811,10 +1811,10 @@ class FStopAsyncIteration(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1822,13 +1822,13 @@ class FStopAsyncIteration(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1872,10 +1872,10 @@ class FSyntaxError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1883,13 +1883,13 @@ class FSyntaxError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1933,10 +1933,10 @@ class FIndentationError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -1944,13 +1944,13 @@ class FIndentationError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -1994,10 +1994,10 @@ class FTabError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2005,13 +2005,13 @@ class FTabError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2055,10 +2055,10 @@ class FSystemError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2066,13 +2066,13 @@ class FSystemError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2116,10 +2116,10 @@ class FSystemExit(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2127,13 +2127,13 @@ class FSystemExit(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2177,10 +2177,10 @@ class FTypeError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2188,13 +2188,13 @@ class FTypeError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2238,10 +2238,10 @@ class FUnboundLocalError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2249,13 +2249,13 @@ class FUnboundLocalError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2299,10 +2299,10 @@ class FUnicodeError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2310,13 +2310,13 @@ class FUnicodeError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2360,10 +2360,10 @@ class FUnicodeEncodeError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2371,13 +2371,13 @@ class FUnicodeEncodeError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2421,10 +2421,10 @@ class FUnicodeDecodeError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2432,13 +2432,13 @@ class FUnicodeDecodeError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2482,10 +2482,10 @@ class FUnicodeTranslateError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2493,13 +2493,13 @@ class FUnicodeTranslateError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2543,10 +2543,10 @@ class FValueError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2554,13 +2554,13 @@ class FValueError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2604,10 +2604,10 @@ class FZeroDivisionError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2615,13 +2615,13 @@ class FZeroDivisionError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2665,10 +2665,10 @@ class FEnvironmentError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2676,13 +2676,13 @@ class FEnvironmentError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2726,10 +2726,10 @@ class FIOError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2737,13 +2737,13 @@ class FIOError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2787,10 +2787,10 @@ class FWindowsError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2798,13 +2798,13 @@ class FWindowsError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2853,10 +2853,10 @@ class FBlockingIOError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2864,13 +2864,13 @@ class FBlockingIOError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2914,10 +2914,10 @@ class FChildProcessError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2925,13 +2925,13 @@ class FChildProcessError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -2975,10 +2975,10 @@ class FConnectionError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -2986,13 +2986,13 @@ class FConnectionError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3036,10 +3036,10 @@ class FBrokenPipeError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3047,13 +3047,13 @@ class FBrokenPipeError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3097,10 +3097,10 @@ class FConnectionAbortedError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3108,13 +3108,13 @@ class FConnectionAbortedError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3158,10 +3158,10 @@ class FConnectionRefusedError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3169,13 +3169,13 @@ class FConnectionRefusedError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3219,10 +3219,10 @@ class FConnectionResetError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3230,13 +3230,13 @@ class FConnectionResetError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3280,10 +3280,10 @@ class FFileExistsError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3291,13 +3291,13 @@ class FFileExistsError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3341,10 +3341,10 @@ class FFileNotFoundError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3352,13 +3352,13 @@ class FFileNotFoundError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3402,10 +3402,10 @@ class FInterruptedError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3413,13 +3413,13 @@ class FInterruptedError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3463,10 +3463,10 @@ class FIsADirectoryError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3474,13 +3474,13 @@ class FIsADirectoryError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3524,10 +3524,10 @@ class FNotADirectoryError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3535,13 +3535,13 @@ class FNotADirectoryError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3585,10 +3585,10 @@ class FPermissionError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3596,13 +3596,13 @@ class FPermissionError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3646,10 +3646,10 @@ class FProcessLookupError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3657,13 +3657,13 @@ class FProcessLookupError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3707,10 +3707,10 @@ class FTimeoutError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3718,13 +3718,13 @@ class FTimeoutError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3773,10 +3773,10 @@ class FWarning(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3784,13 +3784,13 @@ class FWarning(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3834,10 +3834,10 @@ class FUserWarning(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3845,13 +3845,13 @@ class FUserWarning(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3895,10 +3895,10 @@ class FDeprecationWarning(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3906,13 +3906,13 @@ class FDeprecationWarning(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -3956,10 +3956,10 @@ class FPendingDeprecationWarning(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -3967,13 +3967,13 @@ class FPendingDeprecationWarning(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -4017,10 +4017,10 @@ class FSyntaxWarning(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -4028,13 +4028,13 @@ class FSyntaxWarning(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -4078,10 +4078,10 @@ class FRuntimeWarning(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -4089,13 +4089,13 @@ class FRuntimeWarning(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -4139,10 +4139,10 @@ class FFutureWarning(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -4150,13 +4150,13 @@ class FFutureWarning(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -4200,10 +4200,10 @@ class FImportWarning(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -4211,13 +4211,13 @@ class FImportWarning(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -4261,10 +4261,10 @@ class FUnicodeWarning(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -4272,13 +4272,13 @@ class FUnicodeWarning(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -4322,10 +4322,10 @@ class FEncodingWarning(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -4333,13 +4333,13 @@ class FEncodingWarning(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -4383,10 +4383,10 @@ class FBytesWarning(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -4394,13 +4394,13 @@ class FBytesWarning(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -4444,10 +4444,10 @@ class FResourceWarning(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -4455,13 +4455,13 @@ class FResourceWarning(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -4516,10 +4516,10 @@ class FCustomException(Exception):
         Args:
             message_args (dict):
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -4529,13 +4529,13 @@ class FCustomException(Exception):
             \t\t\\- The main exception message.\\
             \t\\- custom_type (custom_type):\\
             \t\t\\- The custom exception type.
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
@@ -4617,10 +4617,10 @@ class FGeneralError(Exception):
         Args:
             message_args (dict):\\
             \t\\- Dictionary will create a formatted exception message.\\
-            tb_limit (int, Optional):\\
+            tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, Optional):\\
+            caller_override (dict, optional):\\
             \t\\- Change the traceback output.\\
             \t\\- Defaults to None.
 
@@ -4628,13 +4628,13 @@ class FGeneralError(Exception):
             message_args Keys:\\
             \t\\- main_message (str):\\
             \t\t\\- The main exception message.\\
-            \t\\- expected_result (Union[str, list], Optional):\\
+            \t\\- expected_result (Union[str, list], optional):\\
             \t\t\\- The expected result.\\
-            \t\\- returned_result (Union[str, list], Optional):\\
+            \t\\- returned_result (Union[str, list], optional):\\
             \t\t\\- The returned result.\\
-            \t\\- suggested_resolution (Union[str, list], Optional):\\
+            \t\\- suggested_resolution (Union[str, list], optional):\\
             \t\t\\- A suggested resolution.\\
-            \t\\- original_exception (any, Optional):\\
+            \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
 
             caller_override Keys:\\
