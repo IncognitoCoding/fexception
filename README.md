@@ -81,7 +81,7 @@ Exception raise with a custom exception class.<br />
       'suggested_resolution': 'Check the input source.',
       'custom_type': MySampleException,
     }
-    raise FCustomException(exc_args)
+    raise MySampleException(FCustomException(exc_args))
 
 ### Example3:
 Exception raise with adjusted traceback.
