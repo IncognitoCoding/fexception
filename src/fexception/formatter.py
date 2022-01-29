@@ -64,10 +64,7 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
         if processed_message_args.original_exception:
             # Checks if the nested exception is previously formatted.
             # Previously formatted exceptions will not have the nested trace details added.
-            if (
-                'Nested Trace Details:' in str(processed_message_args.original_exception)
-                and 'Exception:' in str(processed_message_args.original_exception)
-            ):
+            if 'Nested Trace Details:' not in str(processed_message_args.original_exception):
                 nested_module = Path(processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_filename).stem
                 nested_name = processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_name
                 if str(nested_name) == '<module>':
@@ -77,7 +74,6 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
                 # Sets the trace details even if the limit is 0.
                 # Without the trace details, the nested message would be useless with a limit of 0.
                 formatted_nested_trace_details = (
-                    f'{formatted_original_exception}\n\n'
                     f'            Nested Trace Details:\n'
                     f'              - Exception: {type(processed_message_args.original_exception).__name__}\n'
                     f'              - Module: {nested_module}\n'
