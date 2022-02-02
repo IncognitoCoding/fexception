@@ -3,6 +3,14 @@ from types import FrameType
 from inspect import currentframe
 from typing import cast, Union, Optional
 
+__author__ = 'IncognitoCoding'
+__copyright__ = 'Copyright 2022, util'
+__credits__ = ['IncognitoCoding']
+__license__ = 'MIT'
+__version__ = '0.3.8'
+__maintainer__ = 'IncognitoCoding'
+__status__ = 'Beta'
+
 
 def get_line_number() -> int:
     """Returns the calling function's line number."""
@@ -24,10 +32,8 @@ class InvalidKeyError(Exception):
     Attributes:
         error_message: The invalid key reason.
     """
-    error_message: str
-
-    def __ini__(self, error_message: str) -> None:
-        self.error_message = error_message
+    __module__ = 'builtins'
+    pass
 
 
 class KeyCheck():
@@ -53,17 +59,17 @@ class KeyCheck():
                  caller_name: str,
                  caller_line: int
                  ) -> None:
-        self._values = values
-        self._caller_module = caller_module
-        self._caller_name = caller_name
-        self._caller_line = caller_line
+        self.__values = values
+        self.__caller_module = caller_module
+        self.__caller_name = caller_name
+        self.__caller_line = caller_line
 
     def contains_keys(self, required_keys: Union[str, list], reverse_output: Optional[bool] = False) -> None:
         """
         Checks if some required keys exist in the dictionary.
 
         Args:
-            self._required_keys (Union[str, list])):\\
+            required_keys (Union[str, list])):\\
             \t\\- The required key(s) that should match.\\
             \t\\- Can be a single str or list of keys.
             reverse (bool, optional):\\
@@ -81,17 +87,17 @@ class KeyCheck():
             InvalidKeyError:
             \t\\- The dictionary key (\'{no_matching_key}\') does not match any expected match option key(s).
         """
-        self._required_keys = required_keys
-        self._all_key_check = False
-        self.reverse_output = reverse_output
-        self._key_validation()
+        self.__required_keys = required_keys
+        self.__all_key_check = False
+        self.__reverse_output = reverse_output
+        self.__key_validation()
 
     def all_keys(self, required_keys: Union[str, list], reverse_output: Optional[bool] = False) -> None:
         """
         Checks if all required keys exist in the dictionary
 
         Args:
-            self._required_keys (Union[str, list])):\\
+            required_keys (Union[str, list])):\\
             \t\\- The required key(s) that should match.\\
             \t\\- Can be a single str or list of keys.
             reverse (bool, optional):\\
@@ -109,12 +115,12 @@ class KeyCheck():
             InvalidKeyError:\\
             \t\\- The dictionary key (\'{no_matching_key}\') does not match any expected match option key(s).
         """
-        self._required_keys = required_keys
-        self._all_key_check = True
-        self.reverse_output = reverse_output
-        self._key_validation()
+        self.__required_keys = required_keys
+        self.__all_key_check = True
+        self.__reverse_output = reverse_output
+        self.__key_validation()
 
-    def _key_validation(self) -> None:
+    def __key_validation(self) -> None:
         """
         Performs the key validation.
 
@@ -130,20 +136,20 @@ class KeyCheck():
             \t  does not exist in the expected required key(s).
         """
         # Loops through to find any keys that do not match.
-        dict_keys = list(self._values.keys())
+        dict_keys = list(self.__values.keys())
 
         # Reverses key results for flipped reverse checks.
-        if self.reverse_output:
+        if self.__reverse_output:
             expected_key_result = dict_keys
-            required_key_result = self._required_keys
+            required_key_result = self.__required_keys
         else:
-            expected_key_result = self._required_keys
+            expected_key_result = self.__required_keys
             required_key_result = dict_keys
 
         # Checks for that required keys are sent.
-        if not self._required_keys:
+        if not self.__required_keys:
             # Formats the output based on the check option.
-            if self._all_key_check:
+            if self.__all_key_check:
                 expected_result = f'  - Expected Key(s) = {expected_key_result}'
             else:
                 expected_result = f'  - Expected Match Option Key(s) = {expected_key_result}'
@@ -159,23 +165,23 @@ class KeyCheck():
                 f'  - None\n\n'
                 + f'Trace Details:\n'
                 f'  - Exception: AttributeError\n'
-                f'  - Module: {self._caller_module}\n'
-                f'  - Name: {self._caller_name}\n'
-                f'  - Line: {self._caller_line}\n'
+                f'  - Module: {self.__caller_module}\n'
+                f'  - Name: {self.__caller_name}\n'
+                f'  - Line: {self.__caller_line}\n'
                 + (('-' * 150) + '\n') * 2
             )
             raise AttributeError(error_message)
 
         # Checks for 1:1 input when using the all_keys option.
-        if self._all_key_check:
+        if self.__all_key_check:
             mismatched_input: bool
-            if isinstance(self._required_keys, list):
-                if len(dict_keys) != len(self._required_keys):
+            if isinstance(self.__required_keys, list):
+                if len(dict_keys) != len(self.__required_keys):
                     mismatched_input = True
                 else:
                     mismatched_input = False
             else:
-                if len(self._values) > 1:
+                if len(self.__values) > 1:
                     mismatched_input = True
                 else:
                     mismatched_input = False
@@ -192,9 +198,9 @@ class KeyCheck():
                     f'  - Failed Key(s) = {required_key_result}\n\n'
                     + f'Trace Details:\n'
                     f'  - Exception: AttributeError\n'
-                    f'  - Module: {self._caller_name}\n'
-                    f'  - Name: {self._caller_name}\n'
-                    f'  - Line: {self._caller_line}\n'
+                    f'  - Module: {self.__caller_name}\n'
+                    f'  - Name: {self.__caller_name}\n'
+                    f'  - Line: {self.__caller_line}\n'
                     + (('-' * 150) + '\n') * 2
                 )
                 raise AttributeError(error_message)
@@ -202,8 +208,8 @@ class KeyCheck():
             mismatched_input = False
 
         # Checks for duplicate values.
-        if isinstance(self._required_keys, list):
-            if len(self._required_keys) != len(set(self._required_keys)):
+        if isinstance(self.__required_keys, list):
+            if len(self.__required_keys) != len(set(self.__required_keys)):
                 error_message = (
                     f'The required key list contains duplicate keys. All keys must be unique.\n'
                     + (('-' * 150) + '\n')
@@ -213,9 +219,9 @@ class KeyCheck():
                     f'  - Required Key(s) = {required_key_result}\n\n'
                     + f'Trace Details:\n'
                     f'  - Exception: AttributeError\n'
-                    f'  - Module: {self._caller_module}\n'
-                    f'  - Name: {self._caller_name}\n'
-                    f'  - Line: {self._caller_line}\n'
+                    f'  - Module: {self.__caller_module}\n'
+                    f'  - Name: {self.__caller_name}\n'
+                    f'  - Line: {self.__caller_line}\n'
                     + (('-' * 150) + '\n') * 2
                 )
                 raise AttributeError(error_message)
@@ -231,9 +237,9 @@ class KeyCheck():
                     f'  - Expected Key(s) = {expected_key_result}\n\n'
                     + f'Trace Details:\n'
                     f'  - Exception: AttributeError\n'
-                    f'  - Module: {self._caller_module}\n'
-                    f'  - Name: {self._caller_name}\n'
-                    f'  - Line: {self._caller_line}\n'
+                    f'  - Module: {self.__caller_module}\n'
+                    f'  - Name: {self.__caller_name}\n'
+                    f'  - Line: {self.__caller_line}\n'
                     + (('-' * 150) + '\n') * 2
                 )
                 raise AttributeError(error_message)
@@ -242,12 +248,12 @@ class KeyCheck():
         # but the first no-match in the list of keys.
         sorted_dict_keys = sorted(dict_keys, reverse=True)
 
-        if isinstance(self._required_keys, list):
-            for required_key in self._required_keys:
+        if isinstance(self.__required_keys, list):
+            for required_key in self.__required_keys:
                 # Checks if the validation requires all the required keys
                 # to match all sorted_dict_keys or the required keys to match
                 # some of the sorted_dict_keys.
-                if self._all_key_check:
+                if self.__all_key_check:
                     for dict_key in sorted_dict_keys:
                         # Checks for exact match.
                         if required_key == dict_key:
@@ -266,7 +272,7 @@ class KeyCheck():
                     break
         else:
             # Variable name swap for easier loop reading.
-            required_key: str = self._required_keys
+            required_key: str = self.__required_keys
             for dict_key in sorted_dict_keys:
                 if required_key == dict_key:
                     # Checks for exact match.
@@ -278,7 +284,7 @@ class KeyCheck():
         # Checks if a no matching key exists, to output the error
         if no_matching_key:
             # Formats the output based on the check option.
-            if self._all_key_check:
+            if self.__all_key_check:
                 main_message = (f'The dictionary key (\'{no_matching_key}\') '
                                 'does not exist in the expected required key(s).\n')
                 expected_result = f'  - Expected Key(s) = {expected_key_result}'
@@ -300,9 +306,9 @@ class KeyCheck():
                 f'{returned_result}\n\n'
                 + f'Trace Details:\n'
                 f'  - Exception: AttributeError\n'
-                f'  - Module: {self._caller_module}\n'
-                f'  - Name: {self._caller_name}\n'
-                f'  - Line: {self._caller_line}\n'
+                f'  - Module: {self.__caller_module}\n'
+                f'  - Name: {self.__caller_name}\n'
+                f'  - Line: {self.__caller_line}\n'
                 + (('-' * 150) + '\n') * 2
             )
             raise InvalidKeyError(error_message)

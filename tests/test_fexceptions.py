@@ -117,7 +117,7 @@ def test_1_FCustomException():
             'main_message': 'Testing the FCustomException exception.',
             'custom_type': MySampleException,
         }
-        raise FCustomException(exc_args)
+        raise MySampleException(FCustomException(exc_args))
     assert 'Testing the FCustomException exception.' in str(excinfo.value)
     assert 'Exception: MySampleException' in str(excinfo.value)
 
@@ -135,7 +135,7 @@ def test_2_FCustomException():
             'main_message': 'This is my test error message.',
             'custom_type': 'BAD VALUE ERROR',
         }
-        raise FCustomException(exc_args)
+        raise MySampleException(FCustomException(exc_args))
     assert 'A pre-configured exception' in str(excinfo.value)
 
 

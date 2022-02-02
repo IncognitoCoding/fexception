@@ -1,37 +1,26 @@
 from typing import Union
 from dataclasses import dataclass
 
+__author__ = 'IncognitoCoding'
+__copyright__ = 'Copyright 2022, common'
+__credits__ = ['IncognitoCoding']
+__license__ = 'MIT'
+__version__ = '0.3.8'
+__maintainer__ = 'IncognitoCoding'
+__status__ = 'Beta'
+
 
 class ErrorFormatFailure(Exception):
     """
-    Exception raised for an issue formatting the exception message.
-
-    Args:
-        exception_message:\\
-        \t\\- The invalid key reason.
-    """
+    Exception raised for an issue formatting the exception message."""
     __module__ = 'builtins'
-
-    exception_message: str
-
-    def __init__(self, exception_message: str) -> None:
-        self.exception_message = exception_message
+    pass
 
 
 class InputFailure(Exception):
-    """
-    Exception raised for an input exception message.
-
-    Args:
-        exception_message:\\
-        \t\\- The incorrect input reason.
-    """
+    """Exception raised for an input exception message."""
     __module__ = 'builtins'
-
-    exception_message: str
-
-    def __init__(self, exception_message: str) -> None:
-        self.exception_message = exception_message
+    pass
 
 
 @dataclass

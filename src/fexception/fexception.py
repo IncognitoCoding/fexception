@@ -21,6 +21,15 @@ from .common import (
 )
 
 
+__author__ = 'IncognitoCoding'
+__copyright__ = 'Copyright 2022, fexception'
+__credits__ = ['IncognitoCoding']
+__license__ = 'MIT'
+__version__ = '0.3.8'
+__maintainer__ = 'IncognitoCoding'
+__status__ = 'Beta'
+
+
 # ########################################################
 # #############Processes The Exception Message############
 # ########################################################
