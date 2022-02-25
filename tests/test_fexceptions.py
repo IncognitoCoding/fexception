@@ -8,15 +8,12 @@ from nested import (nested_override,
                     nested_no_override,
                     nested_no_format)
 
-# Local Functions
-from fexception.util import set_caller_override
-
 
 __author__ = 'IncognitoCoding'
 __copyright__ = 'Copyright 2022, test_fexceptions'
 __credits__ = ['IncognitoCoding']
 __license__ = 'MIT'
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 __maintainer__ = 'IncognitoCoding'
 __status__ = 'Beta'
 
@@ -35,6 +32,9 @@ class MySampleException(Exception):
 # ############################################################
 #
 # FGeneralError tests any specific backend calls.
+# pytest-cov does not check some of the calls/checks because it does
+# not look at some underlying info like traceback. These have been excluded.
+#
 #
 def test_1_FKBaseException():
     """

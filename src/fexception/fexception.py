@@ -388,8 +388,8 @@ class FKBaseException(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FException(Exception):
@@ -443,8 +443,8 @@ class FException(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FArithmeticError(Exception):
@@ -498,8 +498,8 @@ class FArithmeticError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FBufferError(Exception):
@@ -553,8 +553,8 @@ class FBufferError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FLookupError(Exception):
@@ -608,8 +608,8 @@ class FLookupError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 # ########################################################
@@ -668,8 +668,8 @@ class FAssertionError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FAttributeError(Exception):
@@ -723,11 +723,11 @@ class FAttributeError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FEOFError(Exception):
@@ -781,8 +781,8 @@ class FEOFError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FFloatingPointError(Exception):
@@ -836,8 +836,8 @@ class FFloatingPointError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FGeneratorExit(Exception):
@@ -891,8 +891,8 @@ class FGeneratorExit(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FImportError(Exception):
@@ -946,8 +946,8 @@ class FImportError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FModuleNotFoundError(Exception):
@@ -1001,8 +1001,8 @@ class FModuleNotFoundError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FIndexError(Exception):
@@ -1056,8 +1056,8 @@ class FIndexError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FKeyError(Exception):
@@ -1111,8 +1111,8 @@ class FKeyError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FKeyboardInterrupt(Exception):
@@ -1166,8 +1166,8 @@ class FKeyboardInterrupt(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FMemoryError(Exception):
@@ -1221,8 +1221,8 @@ class FMemoryError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FNameError(Exception):
@@ -1276,8 +1276,8 @@ class FNameError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FNotImplementedError(Exception):
@@ -1331,8 +1331,8 @@ class FNotImplementedError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FOSError(Exception):
@@ -1386,8 +1386,8 @@ class FOSError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FOverflowError(Exception):
@@ -1441,8 +1441,8 @@ class FOverflowError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FRecursionError(Exception):
@@ -1496,8 +1496,8 @@ class FRecursionError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FReferenceError(Exception):
@@ -1551,8 +1551,8 @@ class FReferenceError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FRuntimeError(Exception):
@@ -1606,8 +1606,8 @@ class FRuntimeError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FStopIteration(Exception):
@@ -1661,8 +1661,8 @@ class FStopIteration(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FStopAsyncIteration(Exception):
@@ -1716,8 +1716,8 @@ class FStopAsyncIteration(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FSyntaxError(Exception):
@@ -1771,8 +1771,8 @@ class FSyntaxError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FIndentationError(Exception):
@@ -1826,8 +1826,8 @@ class FIndentationError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FTabError(Exception):
@@ -1881,8 +1881,8 @@ class FTabError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FSystemError(Exception):
@@ -1936,8 +1936,8 @@ class FSystemError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FSystemExit(Exception):
@@ -1991,8 +1991,8 @@ class FSystemExit(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FTypeError(Exception):
@@ -2046,8 +2046,8 @@ class FTypeError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FUnboundLocalError(Exception):
@@ -2101,8 +2101,8 @@ class FUnboundLocalError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FUnicodeError(Exception):
@@ -2156,8 +2156,8 @@ class FUnicodeError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FUnicodeEncodeError(Exception):
@@ -2211,8 +2211,8 @@ class FUnicodeEncodeError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FUnicodeDecodeError(Exception):
@@ -2266,8 +2266,8 @@ class FUnicodeDecodeError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FUnicodeTranslateError(Exception):
@@ -2321,8 +2321,8 @@ class FUnicodeTranslateError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FValueError(Exception):
@@ -2376,8 +2376,8 @@ class FValueError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FZeroDivisionError(Exception):
@@ -2431,8 +2431,8 @@ class FZeroDivisionError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FEnvironmentError(Exception):
@@ -2486,8 +2486,8 @@ class FEnvironmentError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FIOError(Exception):
@@ -2541,8 +2541,8 @@ class FIOError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FWindowsError(Exception):
@@ -2596,8 +2596,8 @@ class FWindowsError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 # ########################################################
@@ -2656,8 +2656,8 @@ class FBlockingIOError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FChildProcessError(Exception):
@@ -2711,8 +2711,8 @@ class FChildProcessError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FConnectionError(Exception):
@@ -2766,8 +2766,8 @@ class FConnectionError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FBrokenPipeError(Exception):
@@ -2821,8 +2821,8 @@ class FBrokenPipeError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FConnectionAbortedError(Exception):
@@ -2876,8 +2876,8 @@ class FConnectionAbortedError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FConnectionRefusedError(Exception):
@@ -2931,8 +2931,8 @@ class FConnectionRefusedError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FConnectionResetError(Exception):
@@ -2986,8 +2986,8 @@ class FConnectionResetError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FFileExistsError(Exception):
@@ -3041,8 +3041,8 @@ class FFileExistsError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FFileNotFoundError(Exception):
@@ -3096,8 +3096,8 @@ class FFileNotFoundError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FInterruptedError(Exception):
@@ -3151,8 +3151,8 @@ class FInterruptedError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FIsADirectoryError(Exception):
@@ -3206,8 +3206,8 @@ class FIsADirectoryError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FNotADirectoryError(Exception):
@@ -3261,8 +3261,8 @@ class FNotADirectoryError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FPermissionError(Exception):
@@ -3316,8 +3316,8 @@ class FPermissionError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FProcessLookupError(Exception):
@@ -3371,8 +3371,8 @@ class FProcessLookupError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FTimeoutError(Exception):
@@ -3426,8 +3426,8 @@ class FTimeoutError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 # ########################################################
@@ -3486,8 +3486,8 @@ class FWarning(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FUserWarning(Exception):
@@ -3541,8 +3541,8 @@ class FUserWarning(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FDeprecationWarning(Exception):
@@ -3596,8 +3596,8 @@ class FDeprecationWarning(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FPendingDeprecationWarning(Exception):
@@ -3651,8 +3651,8 @@ class FPendingDeprecationWarning(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FSyntaxWarning(Exception):
@@ -3706,8 +3706,8 @@ class FSyntaxWarning(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FRuntimeWarning(Exception):
@@ -3761,8 +3761,8 @@ class FRuntimeWarning(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FFutureWarning(Exception):
@@ -3816,8 +3816,8 @@ class FFutureWarning(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FImportWarning(Exception):
@@ -3871,8 +3871,8 @@ class FImportWarning(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FUnicodeWarning(Exception):
@@ -3926,8 +3926,8 @@ class FUnicodeWarning(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FEncodingWarning(Exception):
@@ -3981,8 +3981,8 @@ class FEncodingWarning(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FBytesWarning(Exception):
@@ -4036,8 +4036,8 @@ class FBytesWarning(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 class FResourceWarning(Exception):
@@ -4091,8 +4091,8 @@ class FResourceWarning(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
 
 
 # ########################################################
@@ -4245,5 +4245,5 @@ class FGeneralError(Exception):
                                                                          tb_limit=tb_limit,
                                                                          caller_override=caller_override))
 
-        # Sets the Exception output used for printing the exception message.
-        Exception.__init__(self, self._formatted_exception)
+            # Sets the Exception output used for printing the exception message.
+            Exception.__init__(self, self._formatted_exception)
