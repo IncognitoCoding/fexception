@@ -31,7 +31,7 @@ __author__ = 'IncognitoCoding'
 __copyright__ = 'Copyright 2022, fexception'
 __credits__ = ['IncognitoCoding']
 __license__ = 'MIT'
-__version__ = '0.3.9'
+__version__ = '0.3.10'
 __maintainer__ = 'IncognitoCoding'
 __status__ = 'Beta'
 
@@ -373,17 +373,20 @@ class FKBaseException(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FKBaseException,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FKBaseException,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -425,17 +428,20 @@ class FException(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FException,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FException,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -477,17 +483,20 @@ class FArithmeticError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FArithmeticError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FArithmeticError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -529,17 +538,20 @@ class FBufferError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FBufferError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FBufferError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -581,17 +593,20 @@ class FLookupError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FLookupError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FLookupError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -638,17 +653,20 @@ class FAssertionError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FAssertionError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FAssertionError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -690,17 +708,20 @@ class FAttributeError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FAttributeError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FAttributeError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -745,17 +766,20 @@ class FEOFError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FEOFError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FEOFError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -797,17 +821,20 @@ class FFloatingPointError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FFloatingPointError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FFloatingPointError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -849,17 +876,20 @@ class FGeneratorExit(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FGeneratorExit,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FGeneratorExit,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -901,17 +931,20 @@ class FImportError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FImportError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FImportError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -953,17 +986,20 @@ class FModuleNotFoundError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FModuleNotFoundError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FModuleNotFoundError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1005,17 +1041,20 @@ class FIndexError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FIndexError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FIndexError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1057,17 +1096,20 @@ class FKeyError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FKeyError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FKeyError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1109,17 +1151,20 @@ class FKeyboardInterrupt(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FKeyboardInterrupt,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FKeyboardInterrupt,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1161,17 +1206,20 @@ class FMemoryError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FMemoryError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FMemoryError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1213,17 +1261,20 @@ class FNameError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FNameError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FNameError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1265,17 +1316,20 @@ class FNotImplementedError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FNotImplementedError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FNotImplementedError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1317,17 +1371,20 @@ class FOSError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FOSError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FOSError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1369,17 +1426,20 @@ class FOverflowError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FOverflowError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FOverflowError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1421,17 +1481,20 @@ class FRecursionError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FRecursionError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FRecursionError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1473,17 +1536,20 @@ class FReferenceError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FReferenceError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FReferenceError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1525,17 +1591,20 @@ class FRuntimeError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FRuntimeError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FRuntimeError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1577,17 +1646,20 @@ class FStopIteration(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FStopIteration,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FStopIteration,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1629,17 +1701,20 @@ class FStopAsyncIteration(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FStopAsyncIteration,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FStopAsyncIteration,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1681,17 +1756,20 @@ class FSyntaxError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FSyntaxError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FSyntaxError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1733,17 +1811,20 @@ class FIndentationError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FIndentationError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FIndentationError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1785,17 +1866,20 @@ class FTabError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FTabError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FTabError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1837,17 +1921,20 @@ class FSystemError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FSystemError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FSystemError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1889,17 +1976,20 @@ class FSystemExit(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FSystemExit,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FSystemExit,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1941,17 +2031,20 @@ class FTypeError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FTypeError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FTypeError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -1993,17 +2086,20 @@ class FUnboundLocalError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FUnboundLocalError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FUnboundLocalError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2045,17 +2141,20 @@ class FUnicodeError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FUnicodeError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FUnicodeError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2097,17 +2196,20 @@ class FUnicodeEncodeError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FUnicodeEncodeError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FUnicodeEncodeError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2149,17 +2251,20 @@ class FUnicodeDecodeError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FUnicodeDecodeError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FUnicodeDecodeError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2201,17 +2306,20 @@ class FUnicodeTranslateError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FUnicodeTranslateError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FUnicodeTranslateError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2253,17 +2361,20 @@ class FValueError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FValueError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FValueError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2305,17 +2416,20 @@ class FZeroDivisionError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FZeroDivisionError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FZeroDivisionError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2357,17 +2471,20 @@ class FEnvironmentError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FEnvironmentError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FEnvironmentError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2409,17 +2526,20 @@ class FIOError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FIOError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FIOError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2461,17 +2581,20 @@ class FWindowsError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FWindowsError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FWindowsError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2518,17 +2641,20 @@ class FBlockingIOError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FBlockingIOError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FBlockingIOError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2570,17 +2696,20 @@ class FChildProcessError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FChildProcessError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FChildProcessError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2622,17 +2751,20 @@ class FConnectionError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FConnectionError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FConnectionError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2674,17 +2806,20 @@ class FBrokenPipeError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FBrokenPipeError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FBrokenPipeError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2726,17 +2861,20 @@ class FConnectionAbortedError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FConnectionAbortedError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FConnectionAbortedError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2778,17 +2916,20 @@ class FConnectionRefusedError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FConnectionRefusedError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FConnectionRefusedError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2830,17 +2971,20 @@ class FConnectionResetError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FConnectionResetError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FConnectionResetError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2882,17 +3026,20 @@ class FFileExistsError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FFileExistsError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FFileExistsError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2934,17 +3081,20 @@ class FFileNotFoundError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FFileNotFoundError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FFileNotFoundError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -2986,17 +3136,20 @@ class FInterruptedError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FInterruptedError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FInterruptedError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3038,17 +3191,20 @@ class FIsADirectoryError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FIsADirectoryError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FIsADirectoryError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3090,17 +3246,20 @@ class FNotADirectoryError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FNotADirectoryError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FNotADirectoryError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3142,17 +3301,20 @@ class FPermissionError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FPermissionError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FPermissionError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3194,17 +3356,20 @@ class FProcessLookupError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FProcessLookupError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FProcessLookupError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3246,17 +3411,20 @@ class FTimeoutError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FTimeoutError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FTimeoutError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3303,17 +3471,20 @@ class FWarning(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FWarning,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FWarning,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3355,17 +3526,20 @@ class FUserWarning(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FUserWarning,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FUserWarning,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3407,17 +3581,20 @@ class FDeprecationWarning(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FDeprecationWarning,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FDeprecationWarning,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3459,17 +3636,20 @@ class FPendingDeprecationWarning(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FPendingDeprecationWarning,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FPendingDeprecationWarning,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3511,17 +3691,20 @@ class FSyntaxWarning(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FSyntaxWarning,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FSyntaxWarning,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3563,17 +3746,20 @@ class FRuntimeWarning(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FRuntimeWarning,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FRuntimeWarning,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3615,17 +3801,20 @@ class FFutureWarning(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FFutureWarning,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FFutureWarning,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3667,17 +3856,20 @@ class FImportWarning(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FImportWarning,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FImportWarning,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3719,17 +3911,20 @@ class FUnicodeWarning(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FUnicodeWarning,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FUnicodeWarning,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3771,17 +3966,20 @@ class FEncodingWarning(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FEncodingWarning,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FEncodingWarning,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3823,17 +4021,20 @@ class FBytesWarning(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FBytesWarning,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FBytesWarning,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3875,17 +4076,20 @@ class FResourceWarning(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FResourceWarning,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FResourceWarning,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)
@@ -3940,46 +4144,49 @@ class FCustomException(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        # The custom exception option accepts custom exception types.
-        # A few additional steps are required for this method.
-        custom_type = message_args.get('custom_type')
-        if not isinstance(custom_type, type):
-            raise InputFailure('A pre-configured exception class is required to use the FCustomException formatter class.')
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            # The custom exception option accepts custom exception types.
+            # A few additional steps are required for this method.
+            custom_type = message_args.get('custom_type')
+            if not isinstance(custom_type, type):
+                raise InputFailure('A pre-configured exception class is required to use the FCustomException formatter class.')
 
-        # Creates a sample dictionary key to use as a contains match for the incoming exception formatter keys.
-        match_dict_key: dict = {'main_message': None, 'expected_result': None, 'returned_result': None,
-                                'suggested_resolution': None, 'original_exception': None, 'custom_type': None}
-        # Pulls the keys from the importing exception dictionary.
-        importing_exception_keys: list = list(message_args.keys())
-        key_check: KeyCheck = KeyCheck(match_dict_key,
-                                       Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                       inspect.currentframe().f_back.f_code.co_name,
-                                       inspect.currentframe().f_back.f_lineno)
-        key_check.contains_keys(importing_exception_keys, reverse_output=True)
+            # Creates a sample dictionary key to use as a contains match for the incoming exception formatter keys.
+            match_dict_key: dict = {'main_message': None, 'expected_result': None, 'returned_result': None,
+                                    'suggested_resolution': None, 'original_exception': None, 'custom_type': None}
+            # Pulls the keys from the importing exception dictionary.
+            importing_exception_keys: list = list(message_args.keys())
+            key_check: KeyCheck = KeyCheck(match_dict_key,
+                                           Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                           inspect.currentframe().f_back.f_code.co_name,
+                                           inspect.currentframe().f_back.f_lineno)
+            key_check.contains_keys(importing_exception_keys, reverse_output=True)
 
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        # Adjusted the tb_limit from None to a number.
-        # None numbers will not run through the except_hook function
-        # because that option returns all output. This adjusted the value
-        # to a high value to run it through the except_hook function to change
-        # the Exception from FCustomException to the custom exception.
-        if tb_limit is None:
-            tb_limit = 1000
-        # Deletes the custom key and value from the message_args because this key is not allowed through other validations.
-        del message_args['custom_type']
+            # Adjusted the tb_limit from None to a number.
+            # None numbers will not run through the except_hook function
+            # because that option returns all output. This adjusted the value
+            # to a high value to run it through the except_hook function to change
+            # the Exception from FCustomException to the custom exception.
+            if tb_limit is None:
+                tb_limit = 1000
+            # Deletes the custom key and value from the message_args because this key is not allowed through other validations.
+            del message_args['custom_type']
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=custom_type,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=custom_type,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
-        Exception.__init__(self, self._formatted_exception)
+            Exception.__init__(self, self._formatted_exception)
 
 
 # ########################################################
@@ -4023,17 +4230,20 @@ class FGeneralError(Exception):
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
         """
-        caller_override: dict = None
-        if tb_remove_name:
-            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
+        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:  # pragma: no cover
+            pass
+        else:
+            caller_override: dict = None
+            if tb_remove_name:
+                caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-        self._formatted_exception = ExceptionProcessor(message_args,
-                                                       ExceptionArgs(exception_type=FGeneralError,
-                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                     tb_limit=tb_limit,
-                                                                     caller_override=caller_override))
+            self._formatted_exception = ExceptionProcessor(message_args,
+                                                           ExceptionArgs(exception_type=FGeneralError,
+                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                         tb_limit=tb_limit,
+                                                                         caller_override=caller_override))
 
         # Sets the Exception output used for printing the exception message.
         Exception.__init__(self, self._formatted_exception)

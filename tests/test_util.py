@@ -11,7 +11,7 @@ __author__ = 'IncognitoCoding'
 __copyright__ = 'Copyright 2022, test_util'
 __credits__ = ['IncognitoCoding']
 __license__ = 'MIT'
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 __maintainer__ = 'IncognitoCoding'
 __status__ = 'Beta'
 
@@ -55,7 +55,7 @@ def test_1_2_keycheck() -> None:
     key_check.contains_keys(required_keys=['key1'])
 
 
-def test_3_keycheck() -> None:
+def test_1_3_keycheck() -> None:
     """
     Tests key check success in reverse.
     """
@@ -161,7 +161,7 @@ def test_2_4_reverse_keycheck():
     assert """Expected Key(s) = ['Green', 'Blue', 'Red']""" in str(excinfo.value)
 
 
-def test_2_41_reverse_keycheck():
+def test_2_5_reverse_keycheck():
     """
     Tests duplicate key input issues.
     """
@@ -175,7 +175,7 @@ def test_2_41_reverse_keycheck():
     assert """Required Key(s) = ['Green', 'Blue', 'Red']""" in str(excinfo.value)
 
 
-def test_2_5_keycheck() -> None:
+def test_2_6_keycheck() -> None:
     """
     Tests key check validation failure.
     """
@@ -190,7 +190,7 @@ def test_2_5_keycheck() -> None:
     assert """Failed Key(s) = ['key1', 'key3']""" in str(excinfo.value)
 
 
-def test_2_6_keycheck() -> None:
+def test_2_7_keycheck() -> None:
     """
     Tests key check validation failure.
     """
@@ -203,7 +203,7 @@ def test_2_6_keycheck() -> None:
     assert """Match Option Key(s) = ['key5']""" in str(excinfo.value)
 
 
-def test_2_7_keycheck():
+def test_2_8_keycheck():
     """
     Tests key check validation failure.
     """
@@ -216,7 +216,7 @@ def test_2_7_keycheck():
     assert """Expected Key(s) = ['key1', 'key2']""" in str(excinfo.value)
 
 
-def test_2_8_reverse_keycheck():
+def test_2_9_reverse_keycheck():
     """
     Tests reverse key check validation failure.
     """
@@ -229,7 +229,7 @@ def test_2_8_reverse_keycheck():
     assert """Expected Key(s) = ['key1', 'key3']""" in str(excinfo.value)
 
 
-def test_2_9_reverse_keycheck():
+def test_2_10_reverse_keycheck():
     """
     Tests reverse key check validation failure.
     """
