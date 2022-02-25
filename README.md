@@ -41,22 +41,12 @@ tb_limit: <br />
   - Setting the tb_limit to zero will remove the "Trace Details" from the exception message. Nested exceptions will still contain "Trace Details". This option may be ideal for an end user-facing message for a specific error.
 
 
-caller_override: <br />
+tb_remove_name: <br />
   - The second option allows you complete control over the returned formatted message and traceback. This is useful if you choose to create sub-modules to perform validation checks, but you do not want those sub-modules to show up in the traceback details.
   - This option is less common but powerful when you have nested helper modules. 
   - The adjusted traceback detail will return to the console when raised, but the back-end traceback will still know the original calls to all modules. Any inspection of the trackback directly will show all calls.
   - A tb_limit value needs to be set when enabling caller_override. Set the value to None for all output or a number to limit the returned traceback lines.
-
-The caller_overide option must be in dictionary format. Use the table below to set option. 
-
-### caller_override Usage Table:
-
-| Key           			        | Type          | Optional | Value  									                                                            |
-| --------------------------- |:-------------:|:--------:|------------------------------------------------------------------------------------- |
-| module                      | str           | no		   | The override module.			                                                            |
-| name                        | str           | no		   | The override name.    		                                                            |
-| line                        | int           | no		   | The override line number.                                                            |
-| tb_remove                   | str           | no		   | The traceback module name that needs to be removed.			                            |
+  - Add the caller function name or any other function in the traceback chain to use this option.
 
 Usage Examples
 ============
@@ -69,7 +59,7 @@ Normal exception raise.
       'returned_result': '2',
       'suggested_resolution': 'Check the input source.',
     }
-    raise FValueError(exc_args)
+    raise FValueError(message_args=exc_args)
 
 ### Example2:
 Exception raise with a custom exception class.<br />
@@ -81,7 +71,7 @@ Exception raise with a custom exception class.<br />
       'suggested_resolution': 'Check the input source.',
       'custom_type': MySampleException,
     }
-    raise MySampleException(FCustomException(exc_args))
+    raise MySampleException(FCustomException(message_args=exc_args))
 
 ### Example3:
 Exception raise with adjusted traceback.
@@ -92,13 +82,7 @@ Exception raise with adjusted traceback.
       'returned_result': '2',
       'suggested_resolution': 'Check the input source.',
     }
-    caller_override = {
-      'module': 'my_module',
-      'name': 'get_type,
-      'line': 90,
-      'tb_remove': 'helpers',
-    }
-    raise FValueError(exc_args, None, caller_override)
+    raise FValueError(message_args=exc_args, tb_limit=None, tb_remove_name='myfunc')
 
 Formatted Exception Message Examples
 ====================================
