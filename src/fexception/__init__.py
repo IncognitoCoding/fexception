@@ -2,10 +2,11 @@ __author__ = 'IncognitoCoding'
 __copyright__ = 'Copyright 2022, fexception'
 __credits__ = ['IncognitoCoding']
 __license__ = 'GPL'
-__version__ = '0.3.8'
+__version__ = '0.3.9'
 __maintainer__ = 'IncognitoCoding'
 __status__ = 'Beta'
 
+# Exceptions
 from .fexception import (
     FKBaseException, FException, FArithmeticError, FBufferError, FLookupError,
     FAssertionError, FAttributeError, FEOFError, FFloatingPointError, FGeneratorExit,
@@ -23,6 +24,9 @@ from .fexception import (
     FSyntaxWarning, FRuntimeWarning, FFutureWarning, FImportWarning, FUnicodeWarning,
     FEncodingWarning, FBytesWarning, FResourceWarning, FCustomException, FGeneralError
 )
+# Exceptions
+from .common import (InputFailure,
+                     CallerOverrideFailure)
 
 __all__ = [
     'fexception'

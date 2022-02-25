@@ -2,11 +2,17 @@
 Sample for nested test.
 """
 from fexception import FTypeError
-import inspect
-from pathlib import Path
+
+__author__ = 'IncognitoCoding'
+__copyright__ = 'Copyright 2022, nested_override'
+__credits__ = ['IncognitoCoding']
+__license__ = 'MIT'
+__version__ = '0.0.1'
+__maintainer__ = 'IncognitoCoding'
+__status__ = 'Beta'
 
 
-def type_validate_override():
+def nested_override():
 
     x = 'Z'
 
@@ -17,16 +23,10 @@ def type_validate_override():
             'returned_result': 'An <class \'int\'>',
             'suggested_resolution': 'Check input variable.'
         }
-        caller_override = {
-            'module': Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-            'name': inspect.currentframe().f_back.f_code.co_name,
-            'line': inspect.currentframe().f_back.f_lineno,
-            'tb_remove': 'nested'
-        }
-        raise FTypeError(exc_args, tb_limit=None, caller_override=caller_override)
+        raise FTypeError(exc_args, tb_limit=None, tb_remove_name='nested_override')
 
 
-def type_validate_no_override():
+def nested_no_override():
 
     x = 'Z'
 
@@ -38,3 +38,11 @@ def type_validate_no_override():
             'suggested_resolution': 'Check input variable.'
         }
         raise FTypeError(exc_args)
+
+
+def nested_no_format():
+
+    x = 'Z'
+
+    if not isinstance(x, int):
+        raise TypeError('Sample no format with the nested module')

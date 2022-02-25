@@ -5,7 +5,7 @@ __author__ = 'IncognitoCoding'
 __copyright__ = 'Copyright 2022, common'
 __credits__ = ['IncognitoCoding']
 __license__ = 'MIT'
-__version__ = '0.3.8'
+__version__ = '0.3.9'
 __maintainer__ = 'IncognitoCoding'
 __status__ = 'Beta'
 
@@ -19,6 +19,12 @@ class ErrorFormatFailure(Exception):
 
 class InputFailure(Exception):
     """Exception raised for an input exception message."""
+    __module__ = 'builtins'
+    pass
+
+
+class CallerOverrideFailure(Exception):
+    """Exception raised for a caller override exception message."""
     __module__ = 'builtins'
     pass
 

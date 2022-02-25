@@ -3,6 +3,7 @@ This is the starting point for the exceptions. Install fexception, set the modul
 This module creates additional information formatted exception output based on the built-in Python exceptions.
 All formatted exceptions are based on one level of the built-in Python exception hierarchy.
 """
+from ctypes import Union
 import dataclasses
 import inspect
 import sys
@@ -11,21 +12,26 @@ import traceback
 from typing import Optional
 from pathlib import Path
 
-
+# Local Functions
 from .formatter import exception_formatter
+from .util import set_caller_override
+
+# Local Methods
 from .util import InvalidKeyError, KeyCheck
-from .common import (
-    ProcessedMessageArgs, ProcessedOverrideArgs,
-    ExceptionArgs, HookArgs,
-    ErrorFormatFailure, InputFailure
-)
+from .common import (ProcessedMessageArgs,
+                     ProcessedOverrideArgs,
+                     ExceptionArgs,
+                     HookArgs)
+
+# Local Exceptions
+from .common import InputFailure
 
 
 __author__ = 'IncognitoCoding'
 __copyright__ = 'Copyright 2022, fexception'
 __credits__ = ['IncognitoCoding']
 __license__ = 'MIT'
-__version__ = '0.3.8'
+__version__ = '0.3.9'
 __maintainer__ = 'IncognitoCoding'
 __status__ = 'Beta'
 
@@ -48,29 +54,29 @@ class ExceptionProcessor:
             \t\\- Exception args to construct the formatted exception message.
         """
         try:
-            self._processed_message_args = ConvertArgs(message_args, exception_args).set_message_args()
-            self._processed_override_args = ConvertArgs(message_args, exception_args).set_override_args()
+            self._processed_message_args: ProcessedOverrideArgs = ConvertArgs(message_args, exception_args).set_message_args()
+            self._processed_override_args: ProcessedOverrideArgs = ConvertArgs(message_args, exception_args).set_override_args()
 
             # Checks if override args are set.
             if 'module=None, name=None, line=None' not in str(self._processed_override_args):
                 # Updates the ExceptionArgs dataclass args with the override values.
-                exception_args = dataclasses.replace(exception_args,
-                                                     caller_module=self._processed_override_args.module)
-                exception_args = dataclasses.replace(exception_args,
-                                                     caller_name=self._processed_override_args.name)
-                exception_args = dataclasses.replace(exception_args,
-                                                     caller_line=self._processed_override_args.line)
+                exception_args: ExceptionArgs = dataclasses.replace(exception_args,
+                                                                    caller_module=self._processed_override_args.module)
+                exception_args: ExceptionArgs = dataclasses.replace(exception_args,
+                                                                    caller_name=self._processed_override_args.name)
+                exception_args: ExceptionArgs = dataclasses.replace(exception_args,
+                                                                    caller_line=self._processed_override_args.line)
             # Formats the exception message based on the args.
-            self._formatted_exception = exception_formatter(self._processed_message_args, exception_args)
+            self._formatted_exception: str = exception_formatter(self._processed_message_args, exception_args)
 
             # Nested override exception detection.
             if self._processed_message_args.original_exception:
                 # Checks if the nested exception is nested with an override to change the return style.
                 # If the nested message has the matching last traceback it means the message was overridden.
                 # An overridden exception requires the sys.excepthook to get called or the messsage will be empty when re-raised.
-                nested_module = Path(self._processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_filename).stem
-                nested_name = self._processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_name
-                nested_line = self._processed_message_args.original_exception.__traceback__.tb_lineno
+                nested_module: str = Path(self._processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_filename).stem
+                nested_name: str = self._processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_name
+                nested_line: str = self._processed_message_args.original_exception.__traceback__.tb_lineno
                 if (
                     exception_args.tb_limit is None
                     and f'Module: {nested_module}' in str(self._processed_message_args.original_exception)
@@ -80,27 +86,18 @@ class ExceptionProcessor:
                     # Changes the tb_limit from None to 1000, to force the formatted exception to run
                     # through the sys.excepthook call.
                     # Using the override will restrict a full trackback return to the most recent call.
-                    exception_args = dataclasses.replace(exception_args,
-                                                         tb_limit=1000)
+                    exception_args: ExceptionArgs = dataclasses.replace(exception_args,
+                                                                        tb_limit=1000)
 
-            self._exception_args = exception_args
+            self._exception_args: ExceptionArgs = exception_args
         except InputFailure as exc:
             # Updates the selected exception_type to the internal exception error.
-            exception_args = dataclasses.replace(exception_args, exception_type=InputFailure)
-            exception_args = dataclasses.replace(exception_args, tb_limit=None)
-            exception_args = dataclasses.replace(exception_args, caller_override=None)
+            exception_args: ExceptionArgs = dataclasses.replace(exception_args, exception_type=InputFailure)
+            exception_args: ExceptionArgs = dataclasses.replace(exception_args, tb_limit=None)
+            exception_args: ExceptionArgs = dataclasses.replace(exception_args, caller_override=None)
             # Sets formatted exception to the internal exception error.
-            self._formatted_exception = exc
-            self._exception_args = exception_args
-            SetLocalExceptionHook(HookArgs(formatted_exception=exc, exception_args=self._exception_args))
-        except ErrorFormatFailure as exc:
-            # Updates the selected exception_type to the internal exception error.
-            exception_args = dataclasses.replace(exception_args, exception_type=ErrorFormatFailure)
-            exception_args = dataclasses.replace(exception_args, tb_limit=None)
-            exception_args = dataclasses.replace(exception_args, caller_override=None)
-            # Sets formatted exception to the internal exception error.
-            self._formatted_exception = exc
-            self._exception_args = exception_args
+            self._formatted_exception: InputFailure = exc
+            self._exception_args: ExceptionArgs = exception_args
             SetLocalExceptionHook(HookArgs(formatted_exception=exc, exception_args=self._exception_args))
         else:
             SetExceptionHook(HookArgs(formatted_exception=self._formatted_exception,
@@ -129,12 +126,12 @@ class ConvertArgs(ExceptionProcessor):
             exception_args (ExceptionArgs):\\
             \t\\- Exception args to construct the formatted exception message.
         """
-        self._message_args = message_args
-        self._caller_module = exception_args.caller_module
-        self._caller_name = exception_args.caller_name
-        self._caller_line = exception_args.caller_line
-        self._tb_limit = exception_args.tb_limit
-        self._caller_override = exception_args.caller_override
+        self._message_args: dict = message_args
+        self._caller_module: str = exception_args.caller_module
+        self._caller_name: str = exception_args.caller_name
+        self._caller_line: int = exception_args.caller_line
+        self._tb_limit: int = exception_args.tb_limit
+        self.__caller_override: dict = exception_args.caller_override
 
     def set_message_args(self) -> ProcessedMessageArgs:
         """
@@ -162,21 +159,21 @@ class ConvertArgs(ExceptionProcessor):
 
         try:
             # Creates a sample dictionary key to use as a contains match for the incoming exception formatter keys.
-            match_dict_key = {'main_message': None, 'expected_result': None, 'returned_result': None,
-                              'suggested_resolution': None, 'original_exception': None, 'original_exception': None}
+            match_dict_key: dict = {'main_message': None, 'expected_result': None, 'returned_result': None,
+                                    'suggested_resolution': None, 'original_exception': None, 'original_exception': None}
             # Pulls the keys from the importing exception dictionary.
-            importing_exception_keys = list(self._message_args.keys())
-            key_check = KeyCheck(match_dict_key,
-                                 self._caller_module,
-                                 self._caller_name,
-                                 self._caller_line)
+            importing_exception_keys: list = list(self._message_args.keys())
+            key_check: KeyCheck = KeyCheck(match_dict_key,
+                                           self._caller_module,
+                                           self._caller_name,
+                                           self._caller_line)
             key_check.contains_keys(importing_exception_keys, reverse_output=True)
 
-            main_message = self._message_args.get('main_message')
-            expected_result = self._message_args.get('expected_result')
-            returned_result = self._message_args.get('returned_result')
-            suggested_resolution = self._message_args.get('suggested_resolution')
-            original_exception = self._message_args.get('original_exception')
+            main_message: str = self._message_args.get('main_message')
+            expected_result: Union[str, list] = self._message_args.get('expected_result')
+            returned_result: Union[str, list] = self._message_args.get('returned_result')
+            suggested_resolution: Union[str, list] = self._message_args.get('suggested_resolution')
+            original_exception: Exception = self._message_args.get('original_exception')
         except (AttributeError, InvalidKeyError) as exc:
             raise InputFailure(exc)
         else:
@@ -201,33 +198,27 @@ class ConvertArgs(ExceptionProcessor):
         Returns:
             ProcessedOverrideArgs: Overide arguments in the dataclass.
         """
-        if self._caller_override:
-            if not isinstance(self._caller_override, dict):
-                raise InputFailure('dict format is the required input to set the caller override option.')
+        if self.__caller_override:
+            # Creates a sample dictionary key to use as a contains match for the incoming exception formatter keys.
+            match_dict_key: dict = {'module': None, 'name': None, 'line': None, 'tb_remove': None}
+            # Pulls the keys from the importing exception dictionary.
+            importing_exception_keys: list = list(self.__caller_override.keys())
+            key_check: KeyCheck = KeyCheck(match_dict_key,
+                                           self._caller_module,
+                                           self._caller_name,
+                                           self._caller_line)
+            key_check.all_keys(importing_exception_keys, reverse_output=True)
 
-            try:
-                # Creates a sample dictionary key to use as a contains match for the incoming exception formatter keys.
-                match_dict_key = {'module': None, 'name': None, 'line': None, 'tb_remove': None}
-                # Pulls the keys from the importing exception dictionary.
-                importing_exception_keys = list(self._caller_override.keys())
-                key_check = KeyCheck(match_dict_key,
-                                     self._caller_module,
-                                     self._caller_name,
-                                     self._caller_line)
-                key_check.all_keys(importing_exception_keys, reverse_output=True)
+            # Gets the dictionary values to set the overide arg
+            module: str = self.__caller_override.get('module')
+            name: str = self.__caller_override.get('name')
+            line: int = self.__caller_override.get('line')
 
-                # Gets the dictionary values to set the overide arg
-                module = self._caller_override.get('module')
-                name = self._caller_override.get('name')
-                line = self._caller_override.get('line')
-            except (AttributeError, InvalidKeyError) as exc:
-                raise InputFailure(exc)
-            else:
-                return ProcessedOverrideArgs(
-                    module=module,
-                    name=name,
-                    line=line,
-                )
+            return ProcessedOverrideArgs(
+                module=module,
+                name=name,
+                line=line,
+            )
         else:
             return ProcessedOverrideArgs(
                 module=None,
@@ -247,15 +238,17 @@ class SetLocalExceptionHook(ExceptionProcessor):
         Args:
             message (str): The local module exception message.
         """
-        self._formatted_exception = hook_args.formatted_exception
-        self.exception_type = hook_args.exception_args.exception_type
+        self._formatted_exception: str = hook_args.formatted_exception
+        self.exception_type: Exception = hook_args.exception_args.exception_type
 
         # Except hook will use custom exceptions and a formatted message,
         # so the kind and message variables will not be used but must exist.
         def except_hook(kind, message, tb) -> sys.excepthook:
             # Returns the selected custom exception class and the formatted exception message.
             # Includes traceback.
-            sys.__excepthook__(self.exception_type, self.exception_type(self._formatted_exception), tb)
+            # Note: This command will not get flaged when running a pytest-cov test
+            #       because the output is backend traceback.
+            sys.__excepthook__(self.exception_type, self.exception_type(self._formatted_exception), tb)  # pragma: no cover
 
         sys.excepthook = except_hook
 
@@ -276,19 +269,26 @@ class SetExceptionHook(ExceptionProcessor):
             hook_args (HookArgs):\\
             \t\\- The formatted excpetion message and exception args.
         """
-        self._formatted_exception = hook_args.formatted_exception
-        self._exception_type = hook_args.exception_args.exception_type
-        self._tb_limit = hook_args.exception_args.tb_limit
+        self._formatted_exception: str = hook_args.formatted_exception
+        self._exception_type: Exception = hook_args.exception_args.exception_type
+        self._tb_limit: int = hook_args.exception_args.tb_limit
         if hook_args.exception_args.caller_override:
-            self._tb_remove = hook_args.exception_args.caller_override.get('tb_remove')
+            self._tb_remove: str = hook_args.exception_args.caller_override.get('tb_remove')
         else:
-            self._tb_remove = None
+            self._tb_remove: str = None
 
+        # ###############################################################
+        # ####################Note: pytest-cov###########################
+        # ###############################################################
+        # This functions commands will not get flaged when running a
+        # pytest-cov test because the output is backend traceback.
         # Except hook will use custom exceptions and a formatted message,
         # so the kind and message variables will not be used but must exist.
-        def except_hook(kind, message, tb) -> sys.excepthook:
+        def except_hook(kind, message, tb) -> sys.excepthook:  # pragma: no cover
             # Checks of the user is setting the traceback limit with an index or override.
             if hook_args.exception_args.caller_override is not None:
+                limit: int = None
+                tb_remove: str = None
                 # Loops through each traceback to find the limit number.
                 for tb_level_index, (frame, _) in enumerate(traceback.walk_tb(tb)):
                     if 'py' in self._tb_remove:
@@ -344,7 +344,7 @@ class FKBaseException(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Base Exception' with additional exception message options.
 
@@ -354,8 +354,10 @@ class FKBaseException(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -370,32 +372,21 @@ class FKBaseException(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FKBaseException,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FKBaseException,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FException(Exception):
@@ -405,7 +396,7 @@ class FException(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Exception' with additional exception message options.
 
@@ -415,8 +406,10 @@ class FException(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -431,32 +424,21 @@ class FException(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FException,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FException,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FArithmeticError(Exception):
@@ -466,7 +448,7 @@ class FArithmeticError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Arithmetic Error' with additional exception message options.
 
@@ -476,8 +458,10 @@ class FArithmeticError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -492,32 +476,21 @@ class FArithmeticError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FArithmeticError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FArithmeticError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FBufferError(Exception):
@@ -527,7 +500,7 @@ class FBufferError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Buffer Error' with additional exception message options.
 
@@ -537,8 +510,10 @@ class FBufferError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -553,32 +528,21 @@ class FBufferError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FBufferError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FBufferError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FLookupError(Exception):
@@ -588,7 +552,7 @@ class FLookupError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Lookup Error' with additional exception message options.
 
@@ -598,8 +562,10 @@ class FLookupError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -614,32 +580,21 @@ class FLookupError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FLookupError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FLookupError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 # ########################################################
@@ -654,7 +609,7 @@ class FAssertionError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Assertion Error' with additional exception message options.
 
@@ -664,8 +619,10 @@ class FAssertionError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -680,32 +637,21 @@ class FAssertionError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FAssertionError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FAssertionError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FAttributeError(Exception):
@@ -715,7 +661,7 @@ class FAttributeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Attribute Error' with additional exception message options.
 
@@ -725,8 +671,10 @@ class FAttributeError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -741,32 +689,24 @@ class FAttributeError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FAttributeError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FAttributeError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FEOFError(Exception):
@@ -776,7 +716,7 @@ class FEOFError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'EOF Error' with additional exception message options.
 
@@ -786,8 +726,10 @@ class FEOFError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -802,32 +744,21 @@ class FEOFError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FEOFError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FEOFError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FFloatingPointError(Exception):
@@ -837,7 +768,7 @@ class FFloatingPointError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'FloatingPoint Error' with additional exception message options.
 
@@ -847,8 +778,10 @@ class FFloatingPointError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -863,32 +796,21 @@ class FFloatingPointError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FFloatingPointError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FFloatingPointError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FGeneratorExit(Exception):
@@ -898,7 +820,7 @@ class FGeneratorExit(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Generator Exit' with additional exception message options.
 
@@ -908,8 +830,10 @@ class FGeneratorExit(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -924,32 +848,21 @@ class FGeneratorExit(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FGeneratorExit,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FGeneratorExit,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FImportError(Exception):
@@ -959,7 +872,7 @@ class FImportError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Import Error' with additional exception message options.
 
@@ -969,8 +882,10 @@ class FImportError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -985,32 +900,21 @@ class FImportError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FImportError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FImportError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FModuleNotFoundError(Exception):
@@ -1020,7 +924,7 @@ class FModuleNotFoundError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'ModuleNotFound Error' with additional exception message options.
 
@@ -1030,8 +934,10 @@ class FModuleNotFoundError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1046,32 +952,21 @@ class FModuleNotFoundError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FModuleNotFoundError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FModuleNotFoundError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FIndexError(Exception):
@@ -1081,7 +976,7 @@ class FIndexError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Index Error' with additional exception message options.
 
@@ -1091,8 +986,10 @@ class FIndexError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1107,32 +1004,21 @@ class FIndexError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FIndexError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FIndexError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FKeyError(Exception):
@@ -1142,7 +1028,7 @@ class FKeyError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Key Error' with additional exception message options.
 
@@ -1152,8 +1038,10 @@ class FKeyError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1168,32 +1056,21 @@ class FKeyError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FKeyError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FKeyError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FKeyboardInterrupt(Exception):
@@ -1203,7 +1080,7 @@ class FKeyboardInterrupt(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Keyboard Interrupt' with additional exception message options.
 
@@ -1213,8 +1090,10 @@ class FKeyboardInterrupt(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1229,32 +1108,21 @@ class FKeyboardInterrupt(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FKeyboardInterrupt,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FKeyboardInterrupt,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FMemoryError(Exception):
@@ -1264,7 +1132,7 @@ class FMemoryError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Memory Error' with additional exception message options.
 
@@ -1274,8 +1142,10 @@ class FMemoryError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1290,32 +1160,21 @@ class FMemoryError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FMemoryError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FMemoryError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FNameError(Exception):
@@ -1325,7 +1184,7 @@ class FNameError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Name Error' with additional exception message options.
 
@@ -1335,8 +1194,10 @@ class FNameError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1351,32 +1212,21 @@ class FNameError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FNameError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FNameError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FNotImplementedError(Exception):
@@ -1386,7 +1236,7 @@ class FNotImplementedError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted ''NotImplemented Error' with additional exception message options.
 
@@ -1396,8 +1246,10 @@ class FNotImplementedError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1412,32 +1264,21 @@ class FNotImplementedError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FNotImplementedError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FNotImplementedError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FOSError(Exception):
@@ -1447,7 +1288,7 @@ class FOSError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'OS Error' with additional exception message options.
 
@@ -1457,8 +1298,10 @@ class FOSError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1473,32 +1316,21 @@ class FOSError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FOSError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FOSError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FOverflowError(Exception):
@@ -1508,7 +1340,7 @@ class FOverflowError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Overflow Error' with additional exception message options.
 
@@ -1518,8 +1350,10 @@ class FOverflowError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1534,32 +1368,21 @@ class FOverflowError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FOverflowError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FOverflowError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FRecursionError(Exception):
@@ -1569,7 +1392,7 @@ class FRecursionError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Recursion Error' with additional exception message options.
 
@@ -1579,8 +1402,10 @@ class FRecursionError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- The name caller function name.\\
+            \t\\- The caller must be a nested
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1595,32 +1420,21 @@ class FRecursionError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FRecursionError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FRecursionError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FReferenceError(Exception):
@@ -1630,7 +1444,7 @@ class FReferenceError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Reference Error' with additional exception message options.
 
@@ -1640,8 +1454,10 @@ class FReferenceError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1656,32 +1472,21 @@ class FReferenceError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FReferenceError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FReferenceError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FRuntimeError(Exception):
@@ -1691,7 +1496,7 @@ class FRuntimeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Runtime Error' with additional exception message options.
 
@@ -1701,8 +1506,10 @@ class FRuntimeError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1717,32 +1524,21 @@ class FRuntimeError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FRuntimeError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FRuntimeError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FStopIteration(Exception):
@@ -1752,7 +1548,7 @@ class FStopIteration(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Stop Iteration' with additional exception message options.
 
@@ -1762,8 +1558,10 @@ class FStopIteration(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1778,32 +1576,21 @@ class FStopIteration(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FStopIteration,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FStopIteration,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FStopAsyncIteration(Exception):
@@ -1813,7 +1600,7 @@ class FStopAsyncIteration(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'StopAsync Iteration' with additional exception message options.
 
@@ -1823,8 +1610,10 @@ class FStopAsyncIteration(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1839,32 +1628,21 @@ class FStopAsyncIteration(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FStopAsyncIteration,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FStopAsyncIteration,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FSyntaxError(Exception):
@@ -1874,7 +1652,7 @@ class FSyntaxError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Syntax Error' with additional exception message options.
 
@@ -1884,8 +1662,10 @@ class FSyntaxError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1900,32 +1680,21 @@ class FSyntaxError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FSyntaxError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FSyntaxError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FIndentationError(Exception):
@@ -1935,7 +1704,7 @@ class FIndentationError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Indentation Error' with additional exception message options.
 
@@ -1945,8 +1714,10 @@ class FIndentationError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -1961,32 +1732,21 @@ class FIndentationError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FIndentationError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FIndentationError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FTabError(Exception):
@@ -1996,7 +1756,7 @@ class FTabError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Tab Error' with additional exception message options.
 
@@ -2006,8 +1766,10 @@ class FTabError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2022,32 +1784,21 @@ class FTabError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FTabError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FTabError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FSystemError(Exception):
@@ -2057,7 +1808,7 @@ class FSystemError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'System Error' with additional exception message options.
 
@@ -2067,8 +1818,10 @@ class FSystemError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2083,32 +1836,21 @@ class FSystemError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FSystemError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FSystemError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FSystemExit(Exception):
@@ -2118,7 +1860,7 @@ class FSystemExit(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'System Exit' with additional exception message options.
 
@@ -2128,8 +1870,10 @@ class FSystemExit(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2144,32 +1888,21 @@ class FSystemExit(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FSystemExit,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FSystemExit,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FTypeError(Exception):
@@ -2179,7 +1912,7 @@ class FTypeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Type Error' with additional exception message options.
 
@@ -2189,8 +1922,10 @@ class FTypeError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2205,32 +1940,21 @@ class FTypeError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FTypeError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FTypeError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FUnboundLocalError(Exception):
@@ -2240,7 +1964,7 @@ class FUnboundLocalError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Unbound Local Error' with additional exception message options.
 
@@ -2250,8 +1974,10 @@ class FUnboundLocalError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2266,32 +1992,21 @@ class FUnboundLocalError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FUnboundLocalError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FUnboundLocalError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FUnicodeError(Exception):
@@ -2301,7 +2016,7 @@ class FUnicodeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Unicode Error' with additional exception message options.
 
@@ -2311,8 +2026,10 @@ class FUnicodeError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2327,32 +2044,21 @@ class FUnicodeError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FUnicodeError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FUnicodeError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FUnicodeEncodeError(Exception):
@@ -2362,7 +2068,7 @@ class FUnicodeEncodeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Unicode Encode Error' with additional exception message options.
 
@@ -2372,8 +2078,10 @@ class FUnicodeEncodeError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2388,32 +2096,21 @@ class FUnicodeEncodeError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FUnicodeEncodeError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FUnicodeEncodeError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FUnicodeDecodeError(Exception):
@@ -2423,7 +2120,7 @@ class FUnicodeDecodeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Unicode Decode Error' with additional exception message options.
 
@@ -2433,8 +2130,10 @@ class FUnicodeDecodeError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2449,32 +2148,21 @@ class FUnicodeDecodeError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FUnicodeDecodeError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FUnicodeDecodeError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FUnicodeTranslateError(Exception):
@@ -2484,7 +2172,7 @@ class FUnicodeTranslateError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Unicode Translate Error' with additional exception message options.
 
@@ -2494,8 +2182,10 @@ class FUnicodeTranslateError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2510,32 +2200,21 @@ class FUnicodeTranslateError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FUnicodeTranslateError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FUnicodeTranslateError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FValueError(Exception):
@@ -2545,7 +2224,7 @@ class FValueError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Value Error' with additional exception message options.
 
@@ -2555,8 +2234,10 @@ class FValueError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2571,32 +2252,21 @@ class FValueError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FValueError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FValueError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FZeroDivisionError(Exception):
@@ -2606,7 +2276,7 @@ class FZeroDivisionError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Zero Division Error' with additional exception message options.
 
@@ -2616,8 +2286,10 @@ class FZeroDivisionError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2632,32 +2304,21 @@ class FZeroDivisionError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FZeroDivisionError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FZeroDivisionError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FEnvironmentError(Exception):
@@ -2667,7 +2328,7 @@ class FEnvironmentError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Environment Error' with additional exception message options.
 
@@ -2677,8 +2338,10 @@ class FEnvironmentError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2693,32 +2356,21 @@ class FEnvironmentError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FEnvironmentError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FEnvironmentError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FIOError(Exception):
@@ -2728,7 +2380,7 @@ class FIOError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'IO Error' with additional exception message options.
 
@@ -2738,8 +2390,10 @@ class FIOError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2754,32 +2408,21 @@ class FIOError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FIOError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FIOError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FWindowsError(Exception):
@@ -2789,7 +2432,7 @@ class FWindowsError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Windows Error' with additional exception message options.
 
@@ -2799,8 +2442,10 @@ class FWindowsError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2815,32 +2460,21 @@ class FWindowsError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FWindowsError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FWindowsError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 # ########################################################
@@ -2855,7 +2489,7 @@ class FBlockingIOError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'BlockingIO Error' with additional exception message options.
 
@@ -2865,8 +2499,10 @@ class FBlockingIOError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2881,32 +2517,21 @@ class FBlockingIOError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FBlockingIOError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FBlockingIOError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FChildProcessError(Exception):
@@ -2916,7 +2541,7 @@ class FChildProcessError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Child Process Error' with additional exception message options.
 
@@ -2926,8 +2551,10 @@ class FChildProcessError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -2942,32 +2569,21 @@ class FChildProcessError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FChildProcessError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FChildProcessError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FConnectionError(Exception):
@@ -2977,7 +2593,7 @@ class FConnectionError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Connection Error' with additional exception message options.
 
@@ -2987,8 +2603,10 @@ class FConnectionError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3003,32 +2621,21 @@ class FConnectionError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FConnectionError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FConnectionError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FBrokenPipeError(Exception):
@@ -3038,7 +2645,7 @@ class FBrokenPipeError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Broken Pipe Error' with additional exception message options.
 
@@ -3048,8 +2655,10 @@ class FBrokenPipeError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3064,32 +2673,21 @@ class FBrokenPipeError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FBrokenPipeError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FBrokenPipeError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FConnectionAbortedError(Exception):
@@ -3099,7 +2697,7 @@ class FConnectionAbortedError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Connection Aborted Error' with additional exception message options.
 
@@ -3109,8 +2707,10 @@ class FConnectionAbortedError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3125,32 +2725,21 @@ class FConnectionAbortedError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FConnectionAbortedError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FConnectionAbortedError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FConnectionRefusedError(Exception):
@@ -3160,7 +2749,7 @@ class FConnectionRefusedError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Connection Refused Error' with additional exception message options.
 
@@ -3170,8 +2759,10 @@ class FConnectionRefusedError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3186,32 +2777,21 @@ class FConnectionRefusedError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FConnectionRefusedError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FConnectionRefusedError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FConnectionResetError(Exception):
@@ -3221,7 +2801,7 @@ class FConnectionResetError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Connection Reset Error' with additional exception message options.
 
@@ -3231,8 +2811,10 @@ class FConnectionResetError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3247,32 +2829,21 @@ class FConnectionResetError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FConnectionResetError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FConnectionResetError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FFileExistsError(Exception):
@@ -3282,7 +2853,7 @@ class FFileExistsError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'File Exists Error' with additional exception message options.
 
@@ -3292,8 +2863,10 @@ class FFileExistsError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3308,32 +2881,21 @@ class FFileExistsError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FFileExistsError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FFileExistsError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FFileNotFoundError(Exception):
@@ -3343,7 +2905,7 @@ class FFileNotFoundError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'FileNotFound Error' with additional exception message options.
 
@@ -3353,8 +2915,10 @@ class FFileNotFoundError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3369,32 +2933,21 @@ class FFileNotFoundError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FFileNotFoundError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FFileNotFoundError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FInterruptedError(Exception):
@@ -3404,7 +2957,7 @@ class FInterruptedError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Interrupted Error' with additional exception message options.
 
@@ -3414,8 +2967,10 @@ class FInterruptedError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3430,32 +2985,21 @@ class FInterruptedError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FInterruptedError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FInterruptedError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FIsADirectoryError(Exception):
@@ -3465,7 +3009,7 @@ class FIsADirectoryError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'IsADirectory Error' with additional exception message options.
 
@@ -3475,8 +3019,10 @@ class FIsADirectoryError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3491,32 +3037,21 @@ class FIsADirectoryError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FIsADirectoryError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FIsADirectoryError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FNotADirectoryError(Exception):
@@ -3526,7 +3061,7 @@ class FNotADirectoryError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'NotADirectory Error' with additional exception message options.
 
@@ -3536,8 +3071,10 @@ class FNotADirectoryError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3552,32 +3089,21 @@ class FNotADirectoryError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FNotADirectoryError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FNotADirectoryError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FPermissionError(Exception):
@@ -3587,7 +3113,7 @@ class FPermissionError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Permission Error' with additional exception message options.
 
@@ -3597,8 +3123,10 @@ class FPermissionError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3613,32 +3141,21 @@ class FPermissionError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FPermissionError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FPermissionError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FProcessLookupError(Exception):
@@ -3648,7 +3165,7 @@ class FProcessLookupError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Process Lookup Error' with additional exception message options.
 
@@ -3658,8 +3175,10 @@ class FProcessLookupError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3674,32 +3193,21 @@ class FProcessLookupError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FProcessLookupError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FProcessLookupError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FTimeoutError(Exception):
@@ -3709,7 +3217,7 @@ class FTimeoutError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Timeout Error' with additional exception message options.
 
@@ -3719,8 +3227,10 @@ class FTimeoutError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3735,32 +3245,21 @@ class FTimeoutError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FTimeoutError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FTimeoutError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 # ########################################################
@@ -3775,7 +3274,7 @@ class FWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Warning' with additional exception message options.
 
@@ -3785,8 +3284,10 @@ class FWarning(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3801,32 +3302,21 @@ class FWarning(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FWarning,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FWarning,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FUserWarning(Exception):
@@ -3836,7 +3326,7 @@ class FUserWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'User Warning' with additional exception message options.
 
@@ -3846,8 +3336,10 @@ class FUserWarning(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3862,32 +3354,21 @@ class FUserWarning(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FUserWarning,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FUserWarning,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FDeprecationWarning(Exception):
@@ -3897,7 +3378,7 @@ class FDeprecationWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Deprecation Warning' with additional exception message options.
 
@@ -3907,8 +3388,10 @@ class FDeprecationWarning(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3923,32 +3406,21 @@ class FDeprecationWarning(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FDeprecationWarning,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FDeprecationWarning,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FPendingDeprecationWarning(Exception):
@@ -3958,7 +3430,7 @@ class FPendingDeprecationWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Pending Deprecation Warning' with additional exception message options.
 
@@ -3968,8 +3440,10 @@ class FPendingDeprecationWarning(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -3984,32 +3458,21 @@ class FPendingDeprecationWarning(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FPendingDeprecationWarning,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FPendingDeprecationWarning,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FSyntaxWarning(Exception):
@@ -4019,7 +3482,7 @@ class FSyntaxWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Syntax Warning' with additional exception message options.
 
@@ -4029,8 +3492,10 @@ class FSyntaxWarning(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -4045,32 +3510,21 @@ class FSyntaxWarning(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FSyntaxWarning,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FSyntaxWarning,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FRuntimeWarning(Exception):
@@ -4080,7 +3534,7 @@ class FRuntimeWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Runtime Warning' with additional exception message options.
 
@@ -4090,8 +3544,10 @@ class FRuntimeWarning(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -4106,32 +3562,21 @@ class FRuntimeWarning(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FRuntimeWarning,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FRuntimeWarning,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FFutureWarning(Exception):
@@ -4141,7 +3586,7 @@ class FFutureWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Future Warning' with additional exception message options.
 
@@ -4151,8 +3596,10 @@ class FFutureWarning(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -4167,32 +3614,21 @@ class FFutureWarning(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FFutureWarning,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FFutureWarning,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FImportWarning(Exception):
@@ -4202,7 +3638,7 @@ class FImportWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Import Warning' with additional exception message options.
 
@@ -4212,8 +3648,10 @@ class FImportWarning(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -4228,32 +3666,21 @@ class FImportWarning(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FImportWarning,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FImportWarning,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FUnicodeWarning(Exception):
@@ -4263,7 +3690,7 @@ class FUnicodeWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Unicode Warning' with additional exception message options.
 
@@ -4273,8 +3700,10 @@ class FUnicodeWarning(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -4289,32 +3718,21 @@ class FUnicodeWarning(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FUnicodeWarning,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FUnicodeWarning,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FEncodingWarning(Exception):
@@ -4324,7 +3742,7 @@ class FEncodingWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Encoding Warning' with additional exception message options.
 
@@ -4334,8 +3752,10 @@ class FEncodingWarning(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -4350,32 +3770,21 @@ class FEncodingWarning(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FEncodingWarning,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FEncodingWarning,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FBytesWarning(Exception):
@@ -4385,7 +3794,7 @@ class FBytesWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Bytes Warning' with additional exception message options.
 
@@ -4395,8 +3804,10 @@ class FBytesWarning(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -4411,32 +3822,21 @@ class FBytesWarning(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FBytesWarning,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FBytesWarning,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 class FResourceWarning(Exception):
@@ -4446,7 +3846,7 @@ class FResourceWarning(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Resource Warning' with additional exception message options.
 
@@ -4456,8 +3856,10 @@ class FResourceWarning(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -4472,32 +3874,21 @@ class FResourceWarning(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FResourceWarning,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FResourceWarning,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
 
 
 # ########################################################
@@ -4514,7 +3905,7 @@ class FCustomException(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'Custom Exception' with additional exception message options.
 
@@ -4528,8 +3919,10 @@ class FCustomException(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -4546,65 +3939,47 @@ class FCustomException(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
+        # The custom exception option accepts custom exception types.
+        # A few additional steps are required for this method.
+        custom_type = message_args.get('custom_type')
+        if not isinstance(custom_type, type):
+            raise InputFailure('A pre-configured exception class is required to use the FCustomException formatter class.')
 
-            # The custom exception option accepts custom exception types.
-            # A few additional steps are required for this method.
-            if not isinstance(message_args, dict):
-                raise InputFailure('Dictionary format is the required input to format an exception message. '
-                                   'Single line messages should use the built-in Python exceptions.')
+        # Creates a sample dictionary key to use as a contains match for the incoming exception formatter keys.
+        match_dict_key: dict = {'main_message': None, 'expected_result': None, 'returned_result': None,
+                                'suggested_resolution': None, 'original_exception': None, 'custom_type': None}
+        # Pulls the keys from the importing exception dictionary.
+        importing_exception_keys: list = list(message_args.keys())
+        key_check: KeyCheck = KeyCheck(match_dict_key,
+                                       Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                       inspect.currentframe().f_back.f_code.co_name,
+                                       inspect.currentframe().f_back.f_lineno)
+        key_check.contains_keys(importing_exception_keys, reverse_output=True)
 
-            custom_type = message_args.get('custom_type')
-            if not isinstance(custom_type, type):
-                raise InputFailure('A pre-configured exception class is required to use the FCustomException formatter class.')
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            try:
-                # Creates a sample dictionary key to use as a contains match for the incoming exception formatter keys.
-                match_dict_key = {'main_message': None, 'expected_result': None, 'returned_result': None,
-                                  'suggested_resolution': None, 'original_exception': None, 'custom_type': None}
-                # Pulls the keys from the importing exception dictionary.
-                importing_exception_keys = list(message_args.keys())
-                key_check = KeyCheck(match_dict_key,
-                                     Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                     inspect.currentframe().f_back.f_code.co_name,
-                                     inspect.currentframe().f_back.f_lineno)
-                key_check.contains_keys(importing_exception_keys, reverse_output=True)
-            except Exception as exc:
-                raise InputFailure(exc)
+        # Adjusted the tb_limit from None to a number.
+        # None numbers will not run through the except_hook function
+        # because that option returns all output. This adjusted the value
+        # to a high value to run it through the except_hook function to change
+        # the Exception from FCustomException to the custom exception.
+        if tb_limit is None:
+            tb_limit = 1000
+        # Deletes the custom key and value from the message_args because this key is not allowed through other validations.
+        del message_args['custom_type']
 
-            # Adjusted the tb_limit from None to a number.
-            # None numbers will not run through the except_hook function
-            # because that option returns all output. This adjusted the value
-            # to a high value to run it through the except_hook function to change
-            # the Exception from FCustomException to the custom exception.
-            if tb_limit is None:
-                tb_limit = 1000
-            # Deletes the custom key and value from the message_args because this key is not allowed through other validations.
-            del message_args['custom_type']
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=custom_type,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=custom_type,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
 
-            Exception.__init__(self, self._formatted_exception)
+        Exception.__init__(self, self._formatted_exception)
 
 
 # ########################################################
@@ -4619,7 +3994,7 @@ class FGeneralError(Exception):
     __slots__ = 'message_args'
     __module__ = 'builtins'
 
-    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, caller_override: Optional[dict] = None) -> None:
+    def __init__(self, message_args: dict, tb_limit: Optional[int] = None, tb_remove_name: Optional[str] = None) -> None:
         """
         Formatted 'General Error' with additional exception message options.
 
@@ -4629,8 +4004,10 @@ class FGeneralError(Exception):
             tb_limit (int, optional):\\
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
-            caller_override (dict, optional):\\
-            \t\\- Change the traceback output.\\
+            tb_remove_name (str, optional):\\
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
+            \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
         Arg Keys:
@@ -4645,29 +4022,18 @@ class FGeneralError(Exception):
             \t\t\\- A suggested resolution.\\
             \t\\- original_exception (any, optional):\\
             \t\t\\- The original exception.
-
-            caller_override Keys:\\
-            \t\\- module (str):\\
-            \t\t\\- The override module.\\
-            \t\\- name (str):\\
-            \t\t\\- The override name.\\
-            \t\\- line (int):\\
-            \t\t\\- The override line.\\
-            \t\\- tb_remove (str):\\
-            \t\t\\- The traceback module name that needing removed.
         """
-        # except_hook is the function that returns the formatted exception.
-        # When the formatted message is returned, the calling function is used to set the class.
-        if 'except_hook' == inspect.currentframe().f_back.f_code.co_name:
-            pass
-        else:
-            self._formatted_exception = ExceptionProcessor(message_args,
-                                                           ExceptionArgs(exception_type=FGeneralError,
-                                                                         caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
-                                                                         caller_line=inspect.currentframe().f_back.f_lineno,
-                                                                         caller_name=inspect.currentframe().f_back.f_code.co_name,
-                                                                         tb_limit=tb_limit,
-                                                                         caller_override=caller_override))
+        caller_override: dict = None
+        if tb_remove_name:
+            caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Sets the Exception output used for printing the exception message.
-            Exception.__init__(self, self._formatted_exception)
+        self._formatted_exception = ExceptionProcessor(message_args,
+                                                       ExceptionArgs(exception_type=FGeneralError,
+                                                                     caller_module=Path(inspect.currentframe().f_back.f_code.co_filename).stem,
+                                                                     caller_line=inspect.currentframe().f_back.f_lineno,
+                                                                     caller_name=inspect.currentframe().f_back.f_code.co_name,
+                                                                     tb_limit=tb_limit,
+                                                                     caller_override=caller_override))
+
+        # Sets the Exception output used for printing the exception message.
+        Exception.__init__(self, self._formatted_exception)
