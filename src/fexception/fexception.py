@@ -1463,8 +1463,8 @@ class FRecursionError(Exception):
             \t\\- Set the traceback limit index at the most recent call.\\
             \t\\-  Defaults to None.\\
             tb_remove_name (str, optional):\\
-            \t\\- The name caller function name.\\
-            \t\\- The caller must be a nested
+            \t\\- Caller function name or any other function in the\\
+            \t   traceback chain.\\
             \t\\- Removes all traceback before and at this function.\\
             \t\\- Defaults to None.
 
