@@ -12,7 +12,7 @@ __author__ = 'IncognitoCoding'
 __copyright__ = 'Copyright 2022, util'
 __credits__ = ['IncognitoCoding']
 __license__ = 'MIT'
-__version__ = '0.3.9'
+__version__ = '0.3.10'
 __maintainer__ = 'IncognitoCoding'
 __status__ = 'Beta'
 
@@ -119,9 +119,9 @@ def set_caller_override(tb_remove_name: str) -> dict:
                 f'  - co_names = {joined_co_names}\n\n'
                 + f'Trace Details:\n'
                 f'  - Exception: AttributeError\n'
-                f'  - Module: {Path(inspect.currentframe().f_back.f_code.co_filename).stem}\n'
-                f'  - Name: {inspect.currentframe().f_back.f_code.co_name}\n'
-                f'  - Line: {inspect.currentframe().f_back.f_lineno}\n'
+                f'  - Module: {Path(inspect.currentframe().f_back.f_back.f_back.f_code.co_filename).stem}\n'
+                f'  - Name: {inspect.currentframe().f_back.f_back.f_back.f_code.co_name}\n'
+                f'  - Line: {inspect.currentframe().f_back.f_back.f_back.f_lineno}\n'
                 + (('-' * 150) + '\n') * 2
             )
             raise CallerOverrideFailure(error_message)
