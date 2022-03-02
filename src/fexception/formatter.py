@@ -6,7 +6,7 @@ __author__ = 'IncognitoCoding'
 __copyright__ = 'Copyright 2022, formatter'
 __credits__ = ['IncognitoCoding']
 __license__ = 'MIT'
-__version__ = '0.3.9'
+__version__ = '0.3.10'
 __maintainer__ = 'IncognitoCoding'
 __status__ = 'Beta'
 
@@ -69,7 +69,9 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
         formatted_returned_result: str = ''
 
     if processed_message_args.original_exception:
-        formatted_nested_trace_details: str = None
+        # Sets as empty string to format empty line if no
+        # nested trace details exist.
+        formatted_nested_trace_details: str = ''
         # Checks if the nested exception is previously formatted.
         # Previously formatted exceptions will not have the nested trace details added.
         if 'Nested Trace Details:' not in str(processed_message_args.original_exception):
@@ -95,7 +97,7 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
                                              + (('~' * 63) + 'Start Original Exception' + ('~' * 63) + '\n            ')
                                              + (('~' * 150) + '\n            \n')
                                              + f'{formatted_original_exception}\n\n'
-                                             + formatted_nested_trace_details
+                                             + f'{formatted_nested_trace_details}'
                                              + '            ' + (('~' * 150) + '\n            ')
                                              + (('~' * 65) + 'End Original Exception' + ('~' * 63) + '\n            ')
                                              + (('~' * 150) + '\n            \n'))

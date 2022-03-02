@@ -6,14 +6,16 @@ from fexception.fexception import *
 # Local tests
 from nested import (nested_override,
                     nested_no_override,
-                    nested_no_format)
+                    nested_no_format,
+                    nested_custom_exception,
+                    nested_nested_custom_exception)
 
 
 __author__ = 'IncognitoCoding'
 __copyright__ = 'Copyright 2022, test_fexceptions'
 __credits__ = ['IncognitoCoding']
 __license__ = 'MIT'
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __maintainer__ = 'IncognitoCoding'
 __status__ = 'Beta'
 
@@ -2681,6 +2683,44 @@ def test_1_2_FCustomException():
     assert 'Exception: MySampleException' in str(excinfo.value)
 
 
+def test_1_3_FCustomException():
+    """
+    Tests formatting a custom type exception to print.
+    """
+    exc_args = {
+        'main_message': 'Problem with the construction project.',
+        'custom_type': MySampleException,
+        'expected_result': 'A door',
+        'returned_result': 'A window',
+        'suggested_resolution': 'Call contractor',
+    }
+    my_exc = MySampleException(FCustomException(message_args=exc_args))
+    assert 'Problem with the construction project.' in str(my_exc)
+    assert 'A door' in str(my_exc)
+    assert 'A window' in str(my_exc)
+    assert 'Call contractor' in str(my_exc)
+    assert 'Exception: MySampleException' in str(my_exc)
+
+
+def test_1_4_FCustomException():
+    """
+    Tests formatting a custom type exception to print.
+    """
+    exc_args = {
+        'main_message': 'Problem with the construction project.',
+        'custom_type': MySampleException,
+        'expected_result': 'A door',
+        'returned_result': 'A window',
+        'suggested_resolution': 'Call contractor',
+    }
+    my_exc = FCustomException(message_args=exc_args)
+    assert 'Problem with the construction project.' in str(my_exc)
+    assert 'A door' in str(my_exc)
+    assert 'A window' in str(my_exc)
+    assert 'Call contractor' in str(my_exc)
+    assert 'Exception: MySampleException' in str(my_exc)
+
+
 def test_1_FGeneralError():
     """
     Tests formatting a FGeneralError exception.
@@ -2849,6 +2889,51 @@ def test_1_1_nested_no_format():
             assert 'Sample no format with the nested module' in str(exc1)
 
 
+def test_1_1_nested_custom_exception():
+    """
+    Tests formatting a nested custom exception with a custom exception.
+
+    Tests 1 layer of nesting.
+    """
+    try:
+        nested_custom_exception()
+    except Exception as exc:
+        assert 'Sample problem with the nested module.' in str(exc)
+
+        try:
+            exc_args = {
+                'main_message': 'More problems with the construction project discussed.',
+                'custom_type': MySampleException,
+                'original_exception': exc
+            }
+            raise MySampleException(FCustomException(message_args=exc_args))
+        except Exception as exc1:
+            assert 'More problems with the construction project discussed.' in str(exc1)
+            assert 'Nested Exception:' in str(exc1)
+            assert 'Name: nested_custom_exception' in str(exc1)
+
+
+def test_1_1_nested_nested_custom_exception():
+    """
+    Tests formatting a nested custom exception with a custom exception.
+
+    Tests 2 layer of nesting. When using more than one layer of nesting some trace details are removed.
+    """
+    try:
+        nested_nested_custom_exception()
+    except Exception as exc:
+        assert 'Sample problem with the nested module in nested module.' in str(exc)
+
+        try:
+            exc_args = {
+                'main_message': 'More and more problems with the construction project discussed.',
+                'custom_type': MySampleException,
+                'original_exception': exc
+            }
+            raise MySampleException(FCustomException(message_args=exc_args))
+        except Exception as exc1:
+            assert 'nested_nested_custom_exception' in str(exc1)
+
 # ############################################################
 # ######Section Test Part 2 (Error/Catch Value Checking)######
 # ############################################################
@@ -2919,6 +3004,25 @@ def test_2_4_FGeneralError():
     assert """Invalid tb_remove_name type.""" in str(excinfo.value)
     assert """<class 'str'>""" in str(excinfo.value)
     assert """<class 'set'>""" in str(excinfo.value)
+
+
+def test_2_5_FGeneralError():
+    """
+    Tests sending an invalid tb_remove_name type.
+    """
+    with pytest.raises(Exception) as excinfo:
+        exc_args = {
+            'main_message': 'Problem with the construction project.',
+            'expected_result': 'A door',
+            'returned_result': 'A window',
+            'suggested_resolution': 'Call contractor',
+        }
+        raise FGeneralError(message_args=exc_args, tb_limit=None, tb_remove_name='invalid_func')
+    assert """The function or method name did not match any co_name in the inspect.currentframe().""" in str(excinfo.value)
+    assert """'invalid_func' matching co_name""" in str(excinfo.value)
+    assert """Module: python""" in str(excinfo.value)
+    assert """Name: pytest_pyfunc_call""" in str(excinfo.value)
+    assert """Line: 183""" in str(excinfo.value)
 
 
 def test_2_FCustomException():
