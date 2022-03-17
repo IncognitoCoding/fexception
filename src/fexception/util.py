@@ -12,7 +12,7 @@ __author__ = 'IncognitoCoding'
 __copyright__ = 'Copyright 2022, util'
 __credits__ = ['IncognitoCoding']
 __license__ = 'MIT'
-__version__ = '0.3.10'
+__version__ = '0.3.11'
 __maintainer__ = 'IncognitoCoding'
 __status__ = 'Beta'
 
@@ -95,8 +95,23 @@ def set_caller_override(tb_remove_name: str) -> dict:
             co_name: str = eval(f'inspect.currentframe().{joined_f_backs}.f_code.co_name')
             # Adds to the list in case an exception occurs.
             co_names.append(co_name)
+
             # Checks if the tb_remove_name (func or method name) matches the f_back co_name.
-            if tb_remove_name == co_name:
+            # The first checks make sure the local __init__ co_name is skipped.
+            if (
+                '__init__' == co_name
+                and tracker >= 3
+            ):
+                f_backs.append('.f_back')
+                joined_f_backs: str = ''.join(f_backs)
+                # Final eval check to make sure an entry exists.
+                co_name: str = eval(f'inspect.currentframe().{joined_f_backs}.f_code.co_name')
+                break
+            # The second check excludes '__init__' and checks if the co_name matches.
+            elif (
+                tb_remove_name == co_name
+                and '__init__' != co_name
+            ):
                 # Adds the next traceback entry after the tb_removal.
                 f_backs.append('.f_back')
                 joined_f_backs: str = ''.join(f_backs)

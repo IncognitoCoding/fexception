@@ -15,7 +15,7 @@ __author__ = 'IncognitoCoding'
 __copyright__ = 'Copyright 2022, test_fexceptions'
 __credits__ = ['IncognitoCoding']
 __license__ = 'MIT'
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 __maintainer__ = 'IncognitoCoding'
 __status__ = 'Beta'
 
@@ -2799,6 +2799,31 @@ def test_1_3_FGeneralError():
     assert 'Exception: FGeneralError' in str(excinfo.value)
     assert 'Module: test_fexceptions' in str(excinfo.value)
     assert 'Name: test_1_3_FGeneralError' in str(excinfo.value)
+
+
+def test_1_4_FGeneralError():
+    """
+    Tests formatting a FGeneralError exception with a class __init__ removal.
+
+    This tests make sure the local __init__ is skipped.
+    """
+    class MyTest():
+        def __init__(self) -> None:
+            exc_args = {
+                'main_message': 'Problem with the construction project.',
+                'expected_result': 'A door',
+                'returned_result': 'A window',
+                'suggested_resolution': 'Call contractor',
+            }
+            raise FGeneralError(message_args=exc_args,
+                                tb_limit=None,
+                                tb_remove_name='__init__')
+
+    with pytest.raises(Exception) as excinfo:
+        MyTest()
+    assert 'Problem with the construction project.' in str(excinfo.value)
+    assert 'Module: test_fexceptions' in str(excinfo.value)
+    assert 'Name: test_1_4_FGeneralError' in str(excinfo.value)
 
 
 def test_1_nested_override():
