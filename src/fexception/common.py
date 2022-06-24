@@ -1,31 +1,41 @@
-from typing import Union
+from typing import Optional, Union, Any
 from dataclasses import dataclass
 
-__author__ = 'IncognitoCoding'
-__copyright__ = 'Copyright 2022, common'
-__credits__ = ['IncognitoCoding']
-__license__ = 'MIT'
-__version__ = '0.3.9'
-__maintainer__ = 'IncognitoCoding'
-__status__ = 'Beta'
+__author__ = "IncognitoCoding"
+__copyright__ = "Copyright 2022, common"
+__credits__ = ["IncognitoCoding"]
+__license__ = "MIT"
+__version__ = "0.3.10"
+__maintainer__ = "IncognitoCoding"
+__status__ = "Beta"
 
 
 class ErrorFormatFailure(Exception):
     """
     Exception raised for an issue formatting the exception message."""
-    __module__ = 'builtins'
+
+    __module__ = "builtins"
     pass
 
 
 class InputFailure(Exception):
     """Exception raised for an input exception message."""
-    __module__ = 'builtins'
+
+    __module__ = "builtins"
     pass
 
 
 class CallerOverrideFailure(Exception):
     """Exception raised for a caller override exception message."""
-    __module__ = 'builtins'
+
+    __module__ = "builtins"
+    pass
+
+
+class TBLineParseFailure(Exception):
+    """Exception raised for a caller override exception message."""
+
+    __module__ = "builtins"
     pass
 
 
@@ -55,8 +65,8 @@ class ProcessedMessageArgs:
         original_exception (any, optional):\\
         \t\\- The original exception.
     """
-    __slots__ = ("main_message", "expected_result", "returned_result",
-                 "suggested_resolution", "original_exception")
+
+    __slots__ = ("main_message", "expected_result", "returned_result", "suggested_resolution", "original_exception")
 
     main_message: str
     expected_result: Union[str, list]
@@ -78,11 +88,12 @@ class ProcessedOverrideArgs:
         line (int):\\
         \t\\- The caller raised exception line number
     """
+
     __slots__ = "module", "name", "line"
 
-    module: str
-    name: str
-    line: int
+    module: Optional[str]
+    name: Optional[str]
+    line: Optional[int]
 
 
 @dataclass
@@ -91,7 +102,7 @@ class ExceptionArgs:
     Exception args to construct the formatted exception message.
 
     Args:
-        exception_type (Exception):\\
+        exception_type (Union[Exception, type]):\\
         \t\\- The exception type.
         caller_module (str):\\
         \t\\- Exception caller module.
@@ -99,19 +110,20 @@ class ExceptionArgs:
         \t\\- Exception function or class name.
         caller_line (int):\\
         \t\\- Exception caller line.
-        tb_limit (int):\\
+        tb_limit (int, optional):\\
         \t\\- Traceback limit index at the most recent call. Defaults to None.
-        caller_override (dict):\\
+        caller_override (dict[str, Any], optional):\\
         \t\\- Changed traceback details. Defaults to None.
     """
+
     __slots__ = "exception_type", "caller_module", "caller_line", "caller_name", "tb_limit", "caller_override"
 
-    exception_type: Exception
+    exception_type: Union[Exception, type]
     caller_module: str
     caller_line: int
     caller_name: str
-    tb_limit: int
-    caller_override: dict
+    tb_limit: Union[int, None]
+    caller_override: Union[dict[str, Any], None]
 
 
 @dataclass
@@ -125,7 +137,8 @@ class HookArgs:
         exception_args (ExceptionArgs):\\
         \t\\- The exception constructor args.
     """
+
     __slots__ = "formatted_exception", "exception_args"
 
-    formatted_exception: str
+    formatted_exception: Union[str, InputFailure]
     exception_args: ExceptionArgs

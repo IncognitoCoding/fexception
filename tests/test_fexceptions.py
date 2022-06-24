@@ -73,7 +73,7 @@ def test_1_1_FKBaseException():
                               tb_remove_name='test_1_1_FKBaseException')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FException():
@@ -111,7 +111,7 @@ def test_1_1_FException():
                          tb_remove_name='test_1_1_FException')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FArithmeticError():
@@ -149,7 +149,7 @@ def test_1_1_FArithmeticError():
                                tb_remove_name='test_1_1_FArithmeticError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FBufferError():
@@ -187,7 +187,7 @@ def test_1_1_FBufferError():
                            tb_remove_name='test_1_1_FBufferError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FLookupError():
@@ -225,7 +225,7 @@ def test_1_1_FLookupError():
                            tb_remove_name='test_1_1_FLookupError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FAssertionError():
@@ -263,7 +263,7 @@ def test_1_1_FAssertionError():
                               tb_remove_name='test_1_1_FAssertionError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FAttributeError():
@@ -301,7 +301,7 @@ def test_1_1_FAttributeError():
                               tb_remove_name='test_1_1_FAttributeError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FEOFError():
@@ -339,7 +339,7 @@ def test_1_1_FEOFError():
                         tb_remove_name='test_1_1_FEOFError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FFloatingPointError():
@@ -377,7 +377,7 @@ def test_1_1_FFloatingPointError():
                                   tb_remove_name='test_1_1_FFloatingPointError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FGeneratorExit():
@@ -415,7 +415,7 @@ def test_1_1_FGeneratorExit():
                              tb_remove_name='test_1_1_FGeneratorExit')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FImportError():
@@ -453,7 +453,7 @@ def test_1_1_FImportError():
                            tb_remove_name='test_1_1_FImportError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FModuleNotFoundError():
@@ -491,7 +491,7 @@ def test_1_1_FModuleNotFoundError():
                                    tb_remove_name='test_1_1_FModuleNotFoundError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FIndexError():
@@ -529,7 +529,7 @@ def test_1_1_FIndexError():
                           tb_remove_name='test_1_1_FIndexError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FKeyError():
@@ -567,7 +567,7 @@ def test_1_1_FKeyError():
                         tb_remove_name='test_1_1_FKeyError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FKeyboardInterrupt():
@@ -605,7 +605,7 @@ def test_1_1_FKeyboardInterrupt():
                                  tb_remove_name='test_1_1_FKeyboardInterrupt')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FMemoryError():
@@ -643,7 +643,7 @@ def test_1_1_FMemoryError():
                            tb_remove_name='test_1_1_FMemoryError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FNameError():
@@ -681,7 +681,7 @@ def test_1_1_FNameError():
                          tb_remove_name='test_1_1_FNameError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FNotImplementedError():
@@ -719,7 +719,7 @@ def test_1_1_FNotImplementedError():
                                    tb_remove_name='test_1_1_FNotImplementedError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FOSError():
@@ -757,7 +757,7 @@ def test_1_1_FOSError():
                        tb_remove_name='test_1_1_FOSError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FOverflowError():
@@ -795,7 +795,7 @@ def test_1_1_FOverflowError():
                              tb_remove_name='test_1_1_FOverflowError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FRecursionError():
@@ -833,7 +833,7 @@ def test_1_1_FRecursionError():
                               tb_remove_name='test_1_1_FRecursionError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FReferenceError():
@@ -871,7 +871,7 @@ def test_1_1_FReferenceError():
                               tb_remove_name='test_1_1_FReferenceError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FRuntimeError():
@@ -909,7 +909,7 @@ def test_1_1_FRuntimeError():
                             tb_remove_name='test_1_1_FRuntimeError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FStopIteration():
@@ -947,7 +947,7 @@ def test_1_1_FStopIteration():
                              tb_remove_name='test_1_1_FStopIteration')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FStopAsyncIteration():
@@ -985,7 +985,7 @@ def test_1_1_FStopAsyncIteration():
                                   tb_remove_name='test_1_1_FStopAsyncIteration')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FSyntaxError():
@@ -1023,7 +1023,7 @@ def test_1_1_FSyntaxError():
                            tb_remove_name='test_1_1_FSyntaxError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FIndentationError():
@@ -1061,7 +1061,7 @@ def test_1_1_FIndentationError():
                                 tb_remove_name='test_1_1_FIndentationError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FTabError():
@@ -1099,7 +1099,7 @@ def test_1_1_FTabError():
                         tb_remove_name='test_1_1_FTabError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FSystemError():
@@ -1137,7 +1137,7 @@ def test_1_1_FSystemError():
                            tb_remove_name='test_1_1_FSystemError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FSystemExit():
@@ -1175,7 +1175,7 @@ def test_1_1_FSystemExit():
                           tb_remove_name='test_1_1_FSystemExit')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FTypeError():
@@ -1213,7 +1213,7 @@ def test_1_1_FTypeError():
                          tb_remove_name='test_1_1_FTypeError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FUnboundLocalError():
@@ -1251,7 +1251,7 @@ def test_1_1_FUnboundLocalError():
                                  tb_remove_name='test_1_1_FUnboundLocalError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FUnicodeError():
@@ -1289,7 +1289,7 @@ def test_1_1_FUnicodeError():
                             tb_remove_name='test_1_1_FUnicodeError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FUnicodeEncodeError():
@@ -1327,7 +1327,7 @@ def test_1_1_FUnicodeEncodeError():
                                   tb_remove_name='test_1_1_FUnicodeEncodeError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FUnicodeDecodeError():
@@ -1365,7 +1365,7 @@ def test_1_1_FUnicodeDecodeError():
                                   tb_remove_name='test_1_1_FUnicodeDecodeError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FUnicodeTranslateError():
@@ -1403,7 +1403,7 @@ def test_1_1_FUnicodeTranslateError():
                                      tb_remove_name='test_1_1_FUnicodeTranslateError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FValueError():
@@ -1441,7 +1441,7 @@ def test_1_1_FValueError():
                           tb_remove_name='test_1_1_FValueError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FZeroDivisionError():
@@ -1479,7 +1479,7 @@ def test_1_1_FZeroDivisionError():
                                  tb_remove_name='test_1_1_FZeroDivisionError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FEnvironmentError():
@@ -1517,7 +1517,7 @@ def test_1_1_FEnvironmentError():
                                 tb_remove_name='test_1_1_FEnvironmentError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FIOError():
@@ -1555,7 +1555,7 @@ def test_1_1_FIOError():
                        tb_remove_name='test_1_1_FIOError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FWindowsError():
@@ -1593,7 +1593,7 @@ def test_1_1_FWindowsError():
                             tb_remove_name='test_1_1_FWindowsError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FBlockingIOError():
@@ -1631,7 +1631,7 @@ def test_1_1_FBlockingIOError():
                                tb_remove_name='test_1_1_FBlockingIOError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FChildProcessError():
@@ -1669,7 +1669,7 @@ def test_1_1_FChildProcessError():
                                  tb_remove_name='test_1_1_FChildProcessError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FConnectionError():
@@ -1707,7 +1707,7 @@ def test_1_1_FConnectionError():
                                tb_remove_name='test_1_1_FConnectionError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FBrokenPipeError():
@@ -1745,7 +1745,7 @@ def test_1_1_FBrokenPipeError():
                                tb_remove_name='test_1_1_FBrokenPipeError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FConnectionAbortedError():
@@ -1783,7 +1783,7 @@ def test_1_1_FConnectionAbortedError():
                                       tb_remove_name='test_1_1_FConnectionAbortedError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FConnectionRefusedError():
@@ -1821,7 +1821,7 @@ def test_1_1_FConnectionRefusedError():
                                       tb_remove_name='test_1_1_FConnectionRefusedError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FConnectionResetError():
@@ -1859,7 +1859,7 @@ def test_1_1_FConnectionResetError():
                                     tb_remove_name='test_1_1_FConnectionResetError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FFileExistsError():
@@ -1897,7 +1897,7 @@ def test_1_1_FFileExistsError():
                                tb_remove_name='test_1_1_FFileExistsError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FFileNotFoundError():
@@ -1935,7 +1935,7 @@ def test_1_1_FFileNotFoundError():
                                  tb_remove_name='test_1_1_FFileNotFoundError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FInterruptedError():
@@ -1973,7 +1973,7 @@ def test_1_1_FInterruptedError():
                                 tb_remove_name='test_1_1_FInterruptedError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FIsADirectoryError():
@@ -2011,7 +2011,7 @@ def test_1_1_FIsADirectoryError():
                                  tb_remove_name='test_1_1_FIsADirectoryError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FNotADirectoryError():
@@ -2049,7 +2049,7 @@ def test_1_1_FNotADirectoryError():
                                   tb_remove_name='test_1_1_FNotADirectoryError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FPermissionError():
@@ -2087,7 +2087,7 @@ def test_1_1_FPermissionError():
                                tb_remove_name='test_1_1_FPermissionError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FProcessLookupError():
@@ -2125,7 +2125,7 @@ def test_1_1_FProcessLookupError():
                                   tb_remove_name='test_1_1_FProcessLookupError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FTimeoutError():
@@ -2163,7 +2163,7 @@ def test_1_1_FTimeoutError():
                             tb_remove_name='test_1_1_FTimeoutError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FWarning():
@@ -2201,7 +2201,7 @@ def test_1_1_FWarning():
                        tb_remove_name='test_1_1_FWarning')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FUserWarning():
@@ -2239,7 +2239,7 @@ def test_1_1_FUserWarning():
                            tb_remove_name='test_1_1_FUserWarning')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FDeprecationWarning():
@@ -2277,7 +2277,7 @@ def test_1_1_FDeprecationWarning():
                                   tb_remove_name='test_1_1_FDeprecationWarning')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FPendingDeprecationWarning():
@@ -2315,7 +2315,7 @@ def test_1_1_FPendingDeprecationWarning():
                                          tb_remove_name='test_1_1_FPendingDeprecationWarning')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FSyntaxWarning():
@@ -2353,7 +2353,7 @@ def test_1_1_FSyntaxWarning():
                              tb_remove_name='test_1_1_FSyntaxWarning')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FRuntimeWarning():
@@ -2391,7 +2391,7 @@ def test_1_1_FRuntimeWarning():
                               tb_remove_name='test_1_1_FRuntimeWarning')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FFutureWarning():
@@ -2429,7 +2429,7 @@ def test_1_1_FFutureWarning():
                              tb_remove_name='test_1_1_FFutureWarning')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FImportWarning():
@@ -2467,7 +2467,7 @@ def test_1_1_FImportWarning():
                              tb_remove_name='test_1_1_FImportWarning')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FUnicodeWarning():
@@ -2505,7 +2505,7 @@ def test_1_1_FUnicodeWarning():
                               tb_remove_name='test_1_1_FUnicodeWarning')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FEncodingWarning():
@@ -2543,7 +2543,7 @@ def test_1_1_FEncodingWarning():
                                tb_remove_name='test_1_1_FEncodingWarning')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FBytesWarning():
@@ -2581,7 +2581,7 @@ def test_1_1_FBytesWarning():
                             tb_remove_name='test_1_1_FBytesWarning')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FResourceWarning():
@@ -2619,7 +2619,7 @@ def test_1_1_FResourceWarning():
                                tb_remove_name='test_1_1_FResourceWarning')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_FCustomException():
@@ -2659,7 +2659,7 @@ def test_1_1_FCustomException():
                                tb_remove_name='test_1_1_FCustomException')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
     assert 'Exception: MySampleException' in str(excinfo.value)
 
 
@@ -2758,7 +2758,7 @@ def test_1_1_FGeneralError():
                             tb_remove_name='test_1_1_FGeneralError')
     assert 'Module: python' in str(excinfo.value)
     assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 183' in str(excinfo.value)
+    assert 'Line: 192' in str(excinfo.value)
 
 
 def test_1_2_FGeneralError():
@@ -3047,7 +3047,7 @@ def test_2_5_FGeneralError():
     assert """'invalid_func' matching co_name""" in str(excinfo.value)
     assert """Module: python""" in str(excinfo.value)
     assert """Name: pytest_pyfunc_call""" in str(excinfo.value)
-    assert """Line: 183""" in str(excinfo.value)
+    assert """Line: 192""" in str(excinfo.value)
 
 
 def test_2_FCustomException():
