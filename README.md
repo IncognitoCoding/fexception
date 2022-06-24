@@ -5,7 +5,7 @@ fexception is designed to provide cleaner useable exceptions. The "f" in fexcept
 
 The purpose of fexception is not to replace or remove traceback or exceptions but to act as a companion to increase valuable messages.
 
-fexception allows anyone to create helper/utility/common modules that raise exceptions to get ignored when returning an exception traceback information and add the caller details into the message.
+fexception allows anyone to create helper/utility/common modules that raise exceptions, but focuses on the caller function as opposed to the helper/utility/common module. All original traceback will display, but the final message will get formatted with the focused exception details.
 
 Description
 ===========
@@ -123,7 +123,7 @@ Formatted Exception Message Examples
     Suggested Resolution:
       - Check input variable.
 
-    Trace Details:
+    Exception Trace Details:
       - Exception: FValueError
       - Module: test_fexceptions
       - Name: test_FValueError
@@ -157,7 +157,7 @@ Formatted Exception Message Examples
                 Suggested Resolution:
                   - Check input variable.
 
-                Trace Details:
+                Exception Trace Details:
                   - Exception: FValueError
                   - Module: test_fexceptions
                   - Name: test_FValueError
@@ -193,7 +193,7 @@ Formatted Exception Message Examples
     Suggested Resolution:
       - Check input variable.
 
-    Trace Details:
+    Exception Trace Details:
       - Exception: FValueError
       - Module: test_fexceptions
       - Name: test_FValueError
@@ -231,7 +231,7 @@ Formatted Exception Message Examples
                 Suggested Resolution:
                   - Check input variable.
 
-                Trace Details:
+                Exception Trace Details:
                   - Exception: FValueError
                   - Module: test_fexceptions
                   - Name: test_FValueError
