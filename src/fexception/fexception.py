@@ -69,32 +69,10 @@ class ExceptionProcessor:
             # Formats the exception message based on the args.
             self._formatted_exception = exception_formatter(self._processed_message_args, exception_args)
 
-            # Nested override exception detection.
-            if self._processed_message_args.original_exception:
-                # Checks if the nested exception is nested with an override to change the return style.
-                # If the nested message has the matching last traceback it means the message was overridden.
-                # An overridden exception requires the sys.excepthook to get called or the messsage will be empty when re-raised.
-                nested_module: str = Path(
-                    self._processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_filename
-                ).stem
-                nested_name: str = self._processed_message_args.original_exception.__traceback__.tb_frame.f_code.co_name
-                nested_line: str = self._processed_message_args.original_exception.__traceback__.tb_lineno
-
-                # Checks if the tb is being limited.
-                if (
-                    exception_args.tb_limit is None
-                    and f"Module: {nested_module}" in str(self._processed_message_args.original_exception)
-                    and f"Name: {nested_name}" in str(self._processed_message_args.original_exception)
-                    and f"Line: {nested_line}" in str(self._processed_message_args.original_exception)
-                ):
-                    full_tb = True
-                else:
-                    full_tb = False
+            if exception_args.tb_limit is None:
+                full_tb = True
             else:
-                if exception_args.tb_limit is None:
-                    full_tb = True
-                else:
-                    full_tb = False
+                full_tb = False
 
             self._exception_args: ExceptionArgs = exception_args
         except InputFailure as exc:
@@ -4687,13 +4665,6 @@ class FCustomException(Exception):
             if tb_remove_name:
                 caller_override = set_caller_override(tb_remove_name=tb_remove_name)
 
-            # Adjusted the tb_limit from None to a number.
-            # No numbers will not run through the except_hook function
-            # because that option returns all output. This adjusted the value
-            # to a high value to run it through the except_hook function to change
-            # the Exception from FCustomException to the custom exception.
-            if tb_limit is None:
-                tb_limit = 1000
             # Deletes the custom key and value from the message_args because this key is not allowed through other validations.
             del message_args["custom_type"]
 

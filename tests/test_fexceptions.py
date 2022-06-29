@@ -4,24 +4,26 @@ import pytest
 from fexception.fexception import *
 
 # Local tests
-from nested import (nested_override,
-                    nested_no_override,
-                    nested_no_format,
-                    nested_custom_exception,
-                    nested_nested_custom_exception)
+from nested import (
+    nested_override,
+    nested_no_override,
+    nested_no_format,
+    nested_custom_exception,
+    nested_nested_custom_exception,
+)
 
 
-__author__ = 'IncognitoCoding'
-__copyright__ = 'Copyright 2022, test_fexceptions'
-__credits__ = ['IncognitoCoding']
-__license__ = 'MIT'
-__version__ = '0.0.4'
-__maintainer__ = 'IncognitoCoding'
-__status__ = 'Beta'
+__author__ = "IncognitoCoding"
+__copyright__ = "Copyright 2022, test_fexceptions"
+__credits__ = ["IncognitoCoding"]
+__license__ = "MIT"
+__version__ = "0.0.5"
+__maintainer__ = "IncognitoCoding"
+__status__ = "Beta"
 
 
 class MySampleException(Exception):
-    __module__ = 'builtins'
+    __module__ = "builtins"
 
     exception_message: str
 
@@ -44,17 +46,17 @@ def test_1_FKBaseException():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FKBaseException(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FKBaseException' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FKBaseException" in str(excinfo.value)
 
 
 def test_1_1_FKBaseException():
@@ -63,17 +65,15 @@ def test_1_1_FKBaseException():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FKBaseException(message_args=exc_args,
-                              tb_limit=None,
-                              tb_remove_name='test_1_1_FKBaseException')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FKBaseException(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FKBaseException")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FException():
@@ -82,17 +82,17 @@ def test_1_FException():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FException(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FException' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FException" in str(excinfo.value)
 
 
 def test_1_1_FException():
@@ -101,17 +101,15 @@ def test_1_1_FException():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FException(message_args=exc_args,
-                         tb_limit=None,
-                         tb_remove_name='test_1_1_FException')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FException(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FException")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FArithmeticError():
@@ -120,17 +118,17 @@ def test_1_FArithmeticError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FArithmeticError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FArithmeticError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FArithmeticError" in str(excinfo.value)
 
 
 def test_1_1_FArithmeticError():
@@ -139,17 +137,15 @@ def test_1_1_FArithmeticError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FArithmeticError(message_args=exc_args,
-                               tb_limit=None,
-                               tb_remove_name='test_1_1_FArithmeticError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FArithmeticError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FArithmeticError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FBufferError():
@@ -158,17 +154,17 @@ def test_1_FBufferError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FBufferError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FBufferError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FBufferError" in str(excinfo.value)
 
 
 def test_1_1_FBufferError():
@@ -177,17 +173,15 @@ def test_1_1_FBufferError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FBufferError(message_args=exc_args,
-                           tb_limit=None,
-                           tb_remove_name='test_1_1_FBufferError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FBufferError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FBufferError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FLookupError():
@@ -196,17 +190,17 @@ def test_1_FLookupError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FLookupError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FLookupError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FLookupError" in str(excinfo.value)
 
 
 def test_1_1_FLookupError():
@@ -215,17 +209,15 @@ def test_1_1_FLookupError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FLookupError(message_args=exc_args,
-                           tb_limit=None,
-                           tb_remove_name='test_1_1_FLookupError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FLookupError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FLookupError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FAssertionError():
@@ -234,17 +226,17 @@ def test_1_FAssertionError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FAssertionError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FAssertionError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FAssertionError" in str(excinfo.value)
 
 
 def test_1_1_FAssertionError():
@@ -253,17 +245,15 @@ def test_1_1_FAssertionError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FAssertionError(message_args=exc_args,
-                              tb_limit=None,
-                              tb_remove_name='test_1_1_FAssertionError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FAssertionError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FAssertionError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FAttributeError():
@@ -272,17 +262,17 @@ def test_1_FAttributeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FAttributeError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FAttributeError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FAttributeError" in str(excinfo.value)
 
 
 def test_1_1_FAttributeError():
@@ -291,17 +281,15 @@ def test_1_1_FAttributeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FAttributeError(message_args=exc_args,
-                              tb_limit=None,
-                              tb_remove_name='test_1_1_FAttributeError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FAttributeError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FAttributeError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FEOFError():
@@ -310,17 +298,17 @@ def test_1_FEOFError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FEOFError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FEOFError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FEOFError" in str(excinfo.value)
 
 
 def test_1_1_FEOFError():
@@ -329,17 +317,15 @@ def test_1_1_FEOFError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FEOFError(message_args=exc_args,
-                        tb_limit=None,
-                        tb_remove_name='test_1_1_FEOFError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FEOFError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FEOFError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FFloatingPointError():
@@ -348,17 +334,17 @@ def test_1_FFloatingPointError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FFloatingPointError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FFloatingPointError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FFloatingPointError" in str(excinfo.value)
 
 
 def test_1_1_FFloatingPointError():
@@ -367,17 +353,15 @@ def test_1_1_FFloatingPointError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FFloatingPointError(message_args=exc_args,
-                                  tb_limit=None,
-                                  tb_remove_name='test_1_1_FFloatingPointError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FFloatingPointError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FFloatingPointError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FGeneratorExit():
@@ -386,17 +370,17 @@ def test_1_FGeneratorExit():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FGeneratorExit(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FGeneratorExit' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FGeneratorExit" in str(excinfo.value)
 
 
 def test_1_1_FGeneratorExit():
@@ -405,17 +389,15 @@ def test_1_1_FGeneratorExit():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FGeneratorExit(message_args=exc_args,
-                             tb_limit=None,
-                             tb_remove_name='test_1_1_FGeneratorExit')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FGeneratorExit(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FGeneratorExit")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FImportError():
@@ -424,17 +406,17 @@ def test_1_FImportError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FImportError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FImportError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FImportError" in str(excinfo.value)
 
 
 def test_1_1_FImportError():
@@ -443,17 +425,15 @@ def test_1_1_FImportError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FImportError(message_args=exc_args,
-                           tb_limit=None,
-                           tb_remove_name='test_1_1_FImportError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FImportError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FImportError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FModuleNotFoundError():
@@ -462,17 +442,17 @@ def test_1_FModuleNotFoundError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FModuleNotFoundError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FModuleNotFoundError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FModuleNotFoundError" in str(excinfo.value)
 
 
 def test_1_1_FModuleNotFoundError():
@@ -481,17 +461,15 @@ def test_1_1_FModuleNotFoundError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FModuleNotFoundError(message_args=exc_args,
-                                   tb_limit=None,
-                                   tb_remove_name='test_1_1_FModuleNotFoundError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FModuleNotFoundError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FModuleNotFoundError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FIndexError():
@@ -500,17 +478,17 @@ def test_1_FIndexError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FIndexError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FIndexError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FIndexError" in str(excinfo.value)
 
 
 def test_1_1_FIndexError():
@@ -519,17 +497,15 @@ def test_1_1_FIndexError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FIndexError(message_args=exc_args,
-                          tb_limit=None,
-                          tb_remove_name='test_1_1_FIndexError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FIndexError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FIndexError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FKeyError():
@@ -538,17 +514,17 @@ def test_1_FKeyError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FKeyError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FKeyError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FKeyError" in str(excinfo.value)
 
 
 def test_1_1_FKeyError():
@@ -557,17 +533,15 @@ def test_1_1_FKeyError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FKeyError(message_args=exc_args,
-                        tb_limit=None,
-                        tb_remove_name='test_1_1_FKeyError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FKeyError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FKeyError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FKeyboardInterrupt():
@@ -576,17 +550,17 @@ def test_1_FKeyboardInterrupt():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FKeyboardInterrupt(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FKeyboardInterrupt' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FKeyboardInterrupt" in str(excinfo.value)
 
 
 def test_1_1_FKeyboardInterrupt():
@@ -595,17 +569,15 @@ def test_1_1_FKeyboardInterrupt():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FKeyboardInterrupt(message_args=exc_args,
-                                 tb_limit=None,
-                                 tb_remove_name='test_1_1_FKeyboardInterrupt')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FKeyboardInterrupt(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FKeyboardInterrupt")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FMemoryError():
@@ -614,17 +586,17 @@ def test_1_FMemoryError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FMemoryError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FMemoryError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FMemoryError" in str(excinfo.value)
 
 
 def test_1_1_FMemoryError():
@@ -633,17 +605,15 @@ def test_1_1_FMemoryError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FMemoryError(message_args=exc_args,
-                           tb_limit=None,
-                           tb_remove_name='test_1_1_FMemoryError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FMemoryError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FMemoryError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FNameError():
@@ -652,17 +622,17 @@ def test_1_FNameError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FNameError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FNameError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FNameError" in str(excinfo.value)
 
 
 def test_1_1_FNameError():
@@ -671,17 +641,15 @@ def test_1_1_FNameError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FNameError(message_args=exc_args,
-                         tb_limit=None,
-                         tb_remove_name='test_1_1_FNameError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FNameError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FNameError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FNotImplementedError():
@@ -690,17 +658,17 @@ def test_1_FNotImplementedError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FNotImplementedError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FNotImplementedError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FNotImplementedError" in str(excinfo.value)
 
 
 def test_1_1_FNotImplementedError():
@@ -709,17 +677,15 @@ def test_1_1_FNotImplementedError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FNotImplementedError(message_args=exc_args,
-                                   tb_limit=None,
-                                   tb_remove_name='test_1_1_FNotImplementedError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FNotImplementedError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FNotImplementedError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FOSError():
@@ -728,17 +694,17 @@ def test_1_FOSError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FOSError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FOSError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FOSError" in str(excinfo.value)
 
 
 def test_1_1_FOSError():
@@ -747,17 +713,15 @@ def test_1_1_FOSError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FOSError(message_args=exc_args,
-                       tb_limit=None,
-                       tb_remove_name='test_1_1_FOSError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FOSError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FOSError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FOverflowError():
@@ -766,17 +730,17 @@ def test_1_FOverflowError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FOverflowError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FOverflowError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FOverflowError" in str(excinfo.value)
 
 
 def test_1_1_FOverflowError():
@@ -785,17 +749,15 @@ def test_1_1_FOverflowError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FOverflowError(message_args=exc_args,
-                             tb_limit=None,
-                             tb_remove_name='test_1_1_FOverflowError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FOverflowError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FOverflowError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FRecursionError():
@@ -804,17 +766,17 @@ def test_1_FRecursionError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FRecursionError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FRecursionError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FRecursionError" in str(excinfo.value)
 
 
 def test_1_1_FRecursionError():
@@ -823,17 +785,15 @@ def test_1_1_FRecursionError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FRecursionError(message_args=exc_args,
-                              tb_limit=None,
-                              tb_remove_name='test_1_1_FRecursionError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FRecursionError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FRecursionError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FReferenceError():
@@ -842,17 +802,17 @@ def test_1_FReferenceError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FReferenceError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FReferenceError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FReferenceError" in str(excinfo.value)
 
 
 def test_1_1_FReferenceError():
@@ -861,17 +821,15 @@ def test_1_1_FReferenceError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FReferenceError(message_args=exc_args,
-                              tb_limit=None,
-                              tb_remove_name='test_1_1_FReferenceError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FReferenceError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FReferenceError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FRuntimeError():
@@ -880,17 +838,17 @@ def test_1_FRuntimeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FRuntimeError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FRuntimeError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FRuntimeError" in str(excinfo.value)
 
 
 def test_1_1_FRuntimeError():
@@ -899,17 +857,15 @@ def test_1_1_FRuntimeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FRuntimeError(message_args=exc_args,
-                            tb_limit=None,
-                            tb_remove_name='test_1_1_FRuntimeError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FRuntimeError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FRuntimeError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FStopIteration():
@@ -918,17 +874,17 @@ def test_1_FStopIteration():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FStopIteration(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FStopIteration' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FStopIteration" in str(excinfo.value)
 
 
 def test_1_1_FStopIteration():
@@ -937,17 +893,15 @@ def test_1_1_FStopIteration():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FStopIteration(message_args=exc_args,
-                             tb_limit=None,
-                             tb_remove_name='test_1_1_FStopIteration')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FStopIteration(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FStopIteration")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FStopAsyncIteration():
@@ -956,17 +910,17 @@ def test_1_FStopAsyncIteration():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FStopAsyncIteration(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FStopAsyncIteration' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FStopAsyncIteration" in str(excinfo.value)
 
 
 def test_1_1_FStopAsyncIteration():
@@ -975,17 +929,15 @@ def test_1_1_FStopAsyncIteration():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FStopAsyncIteration(message_args=exc_args,
-                                  tb_limit=None,
-                                  tb_remove_name='test_1_1_FStopAsyncIteration')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FStopAsyncIteration(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FStopAsyncIteration")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FSyntaxError():
@@ -994,17 +946,17 @@ def test_1_FSyntaxError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FSyntaxError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FSyntaxError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FSyntaxError" in str(excinfo.value)
 
 
 def test_1_1_FSyntaxError():
@@ -1013,17 +965,15 @@ def test_1_1_FSyntaxError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FSyntaxError(message_args=exc_args,
-                           tb_limit=None,
-                           tb_remove_name='test_1_1_FSyntaxError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FSyntaxError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FSyntaxError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FIndentationError():
@@ -1032,17 +982,17 @@ def test_1_FIndentationError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FIndentationError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FIndentationError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FIndentationError" in str(excinfo.value)
 
 
 def test_1_1_FIndentationError():
@@ -1051,17 +1001,15 @@ def test_1_1_FIndentationError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FIndentationError(message_args=exc_args,
-                                tb_limit=None,
-                                tb_remove_name='test_1_1_FIndentationError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FIndentationError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FIndentationError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FTabError():
@@ -1070,17 +1018,17 @@ def test_1_FTabError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FTabError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FTabError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FTabError" in str(excinfo.value)
 
 
 def test_1_1_FTabError():
@@ -1089,17 +1037,15 @@ def test_1_1_FTabError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FTabError(message_args=exc_args,
-                        tb_limit=None,
-                        tb_remove_name='test_1_1_FTabError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FTabError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FTabError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FSystemError():
@@ -1108,17 +1054,17 @@ def test_1_FSystemError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FSystemError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FSystemError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FSystemError" in str(excinfo.value)
 
 
 def test_1_1_FSystemError():
@@ -1127,17 +1073,15 @@ def test_1_1_FSystemError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FSystemError(message_args=exc_args,
-                           tb_limit=None,
-                           tb_remove_name='test_1_1_FSystemError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FSystemError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FSystemError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FSystemExit():
@@ -1146,17 +1090,17 @@ def test_1_FSystemExit():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FSystemExit(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FSystemExit' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FSystemExit" in str(excinfo.value)
 
 
 def test_1_1_FSystemExit():
@@ -1165,17 +1109,15 @@ def test_1_1_FSystemExit():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FSystemExit(message_args=exc_args,
-                          tb_limit=None,
-                          tb_remove_name='test_1_1_FSystemExit')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FSystemExit(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FSystemExit")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FTypeError():
@@ -1184,17 +1126,17 @@ def test_1_FTypeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FTypeError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FTypeError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FTypeError" in str(excinfo.value)
 
 
 def test_1_1_FTypeError():
@@ -1203,17 +1145,15 @@ def test_1_1_FTypeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FTypeError(message_args=exc_args,
-                         tb_limit=None,
-                         tb_remove_name='test_1_1_FTypeError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FTypeError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FTypeError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FUnboundLocalError():
@@ -1222,17 +1162,17 @@ def test_1_FUnboundLocalError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FUnboundLocalError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FUnboundLocalError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FUnboundLocalError" in str(excinfo.value)
 
 
 def test_1_1_FUnboundLocalError():
@@ -1241,17 +1181,15 @@ def test_1_1_FUnboundLocalError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FUnboundLocalError(message_args=exc_args,
-                                 tb_limit=None,
-                                 tb_remove_name='test_1_1_FUnboundLocalError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FUnboundLocalError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FUnboundLocalError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FUnicodeError():
@@ -1260,17 +1198,17 @@ def test_1_FUnicodeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FUnicodeError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FUnicodeError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FUnicodeError" in str(excinfo.value)
 
 
 def test_1_1_FUnicodeError():
@@ -1279,17 +1217,15 @@ def test_1_1_FUnicodeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FUnicodeError(message_args=exc_args,
-                            tb_limit=None,
-                            tb_remove_name='test_1_1_FUnicodeError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FUnicodeError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FUnicodeError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FUnicodeEncodeError():
@@ -1298,17 +1234,17 @@ def test_1_FUnicodeEncodeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FUnicodeEncodeError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FUnicodeEncodeError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FUnicodeEncodeError" in str(excinfo.value)
 
 
 def test_1_1_FUnicodeEncodeError():
@@ -1317,17 +1253,15 @@ def test_1_1_FUnicodeEncodeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FUnicodeEncodeError(message_args=exc_args,
-                                  tb_limit=None,
-                                  tb_remove_name='test_1_1_FUnicodeEncodeError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FUnicodeEncodeError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FUnicodeEncodeError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FUnicodeDecodeError():
@@ -1336,17 +1270,17 @@ def test_1_FUnicodeDecodeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FUnicodeDecodeError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FUnicodeDecodeError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FUnicodeDecodeError" in str(excinfo.value)
 
 
 def test_1_1_FUnicodeDecodeError():
@@ -1355,17 +1289,15 @@ def test_1_1_FUnicodeDecodeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FUnicodeDecodeError(message_args=exc_args,
-                                  tb_limit=None,
-                                  tb_remove_name='test_1_1_FUnicodeDecodeError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FUnicodeDecodeError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FUnicodeDecodeError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FUnicodeTranslateError():
@@ -1374,17 +1306,17 @@ def test_1_FUnicodeTranslateError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FUnicodeTranslateError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FUnicodeTranslateError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FUnicodeTranslateError" in str(excinfo.value)
 
 
 def test_1_1_FUnicodeTranslateError():
@@ -1393,17 +1325,17 @@ def test_1_1_FUnicodeTranslateError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FUnicodeTranslateError(message_args=exc_args,
-                                     tb_limit=None,
-                                     tb_remove_name='test_1_1_FUnicodeTranslateError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FUnicodeTranslateError(
+            message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FUnicodeTranslateError"
+        )
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FValueError():
@@ -1412,17 +1344,17 @@ def test_1_FValueError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FValueError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FValueError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FValueError" in str(excinfo.value)
 
 
 def test_1_1_FValueError():
@@ -1431,17 +1363,15 @@ def test_1_1_FValueError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FValueError(message_args=exc_args,
-                          tb_limit=None,
-                          tb_remove_name='test_1_1_FValueError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FValueError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FValueError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FZeroDivisionError():
@@ -1450,17 +1380,17 @@ def test_1_FZeroDivisionError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FZeroDivisionError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FZeroDivisionError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FZeroDivisionError" in str(excinfo.value)
 
 
 def test_1_1_FZeroDivisionError():
@@ -1469,17 +1399,15 @@ def test_1_1_FZeroDivisionError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FZeroDivisionError(message_args=exc_args,
-                                 tb_limit=None,
-                                 tb_remove_name='test_1_1_FZeroDivisionError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FZeroDivisionError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FZeroDivisionError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FEnvironmentError():
@@ -1488,17 +1416,17 @@ def test_1_FEnvironmentError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FEnvironmentError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FEnvironmentError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FEnvironmentError" in str(excinfo.value)
 
 
 def test_1_1_FEnvironmentError():
@@ -1507,17 +1435,15 @@ def test_1_1_FEnvironmentError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FEnvironmentError(message_args=exc_args,
-                                tb_limit=None,
-                                tb_remove_name='test_1_1_FEnvironmentError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FEnvironmentError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FEnvironmentError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FIOError():
@@ -1526,17 +1452,17 @@ def test_1_FIOError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FIOError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FIOError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FIOError" in str(excinfo.value)
 
 
 def test_1_1_FIOError():
@@ -1545,17 +1471,15 @@ def test_1_1_FIOError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FIOError(message_args=exc_args,
-                       tb_limit=None,
-                       tb_remove_name='test_1_1_FIOError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FIOError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FIOError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FWindowsError():
@@ -1564,17 +1488,17 @@ def test_1_FWindowsError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FWindowsError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FWindowsError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FWindowsError" in str(excinfo.value)
 
 
 def test_1_1_FWindowsError():
@@ -1583,17 +1507,15 @@ def test_1_1_FWindowsError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FWindowsError(message_args=exc_args,
-                            tb_limit=None,
-                            tb_remove_name='test_1_1_FWindowsError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FWindowsError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FWindowsError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FBlockingIOError():
@@ -1602,17 +1524,17 @@ def test_1_FBlockingIOError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FBlockingIOError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FBlockingIOError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FBlockingIOError" in str(excinfo.value)
 
 
 def test_1_1_FBlockingIOError():
@@ -1621,17 +1543,15 @@ def test_1_1_FBlockingIOError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FBlockingIOError(message_args=exc_args,
-                               tb_limit=None,
-                               tb_remove_name='test_1_1_FBlockingIOError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FBlockingIOError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FBlockingIOError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FChildProcessError():
@@ -1640,17 +1560,17 @@ def test_1_FChildProcessError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FChildProcessError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FChildProcessError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FChildProcessError" in str(excinfo.value)
 
 
 def test_1_1_FChildProcessError():
@@ -1659,17 +1579,15 @@ def test_1_1_FChildProcessError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FChildProcessError(message_args=exc_args,
-                                 tb_limit=None,
-                                 tb_remove_name='test_1_1_FChildProcessError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FChildProcessError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FChildProcessError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FConnectionError():
@@ -1678,17 +1596,17 @@ def test_1_FConnectionError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FConnectionError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FConnectionError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FConnectionError" in str(excinfo.value)
 
 
 def test_1_1_FConnectionError():
@@ -1697,17 +1615,15 @@ def test_1_1_FConnectionError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FConnectionError(message_args=exc_args,
-                               tb_limit=None,
-                               tb_remove_name='test_1_1_FConnectionError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FConnectionError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FConnectionError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FBrokenPipeError():
@@ -1716,17 +1632,17 @@ def test_1_FBrokenPipeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FBrokenPipeError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FBrokenPipeError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FBrokenPipeError" in str(excinfo.value)
 
 
 def test_1_1_FBrokenPipeError():
@@ -1735,17 +1651,15 @@ def test_1_1_FBrokenPipeError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FBrokenPipeError(message_args=exc_args,
-                               tb_limit=None,
-                               tb_remove_name='test_1_1_FBrokenPipeError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FBrokenPipeError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FBrokenPipeError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FConnectionAbortedError():
@@ -1754,17 +1668,17 @@ def test_1_FConnectionAbortedError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FConnectionAbortedError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FConnectionAbortedError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FConnectionAbortedError" in str(excinfo.value)
 
 
 def test_1_1_FConnectionAbortedError():
@@ -1773,17 +1687,17 @@ def test_1_1_FConnectionAbortedError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FConnectionAbortedError(message_args=exc_args,
-                                      tb_limit=None,
-                                      tb_remove_name='test_1_1_FConnectionAbortedError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FConnectionAbortedError(
+            message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FConnectionAbortedError"
+        )
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FConnectionRefusedError():
@@ -1792,17 +1706,17 @@ def test_1_FConnectionRefusedError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FConnectionRefusedError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FConnectionRefusedError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FConnectionRefusedError" in str(excinfo.value)
 
 
 def test_1_1_FConnectionRefusedError():
@@ -1811,17 +1725,17 @@ def test_1_1_FConnectionRefusedError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FConnectionRefusedError(message_args=exc_args,
-                                      tb_limit=None,
-                                      tb_remove_name='test_1_1_FConnectionRefusedError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FConnectionRefusedError(
+            message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FConnectionRefusedError"
+        )
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FConnectionResetError():
@@ -1830,17 +1744,17 @@ def test_1_FConnectionResetError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FConnectionResetError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FConnectionResetError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FConnectionResetError" in str(excinfo.value)
 
 
 def test_1_1_FConnectionResetError():
@@ -1849,17 +1763,17 @@ def test_1_1_FConnectionResetError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FConnectionResetError(message_args=exc_args,
-                                    tb_limit=None,
-                                    tb_remove_name='test_1_1_FConnectionResetError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FConnectionResetError(
+            message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FConnectionResetError"
+        )
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FFileExistsError():
@@ -1868,17 +1782,17 @@ def test_1_FFileExistsError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FFileExistsError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FFileExistsError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FFileExistsError" in str(excinfo.value)
 
 
 def test_1_1_FFileExistsError():
@@ -1887,17 +1801,15 @@ def test_1_1_FFileExistsError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FFileExistsError(message_args=exc_args,
-                               tb_limit=None,
-                               tb_remove_name='test_1_1_FFileExistsError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FFileExistsError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FFileExistsError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FFileNotFoundError():
@@ -1906,17 +1818,17 @@ def test_1_FFileNotFoundError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FFileNotFoundError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FFileNotFoundError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FFileNotFoundError" in str(excinfo.value)
 
 
 def test_1_1_FFileNotFoundError():
@@ -1925,17 +1837,15 @@ def test_1_1_FFileNotFoundError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FFileNotFoundError(message_args=exc_args,
-                                 tb_limit=None,
-                                 tb_remove_name='test_1_1_FFileNotFoundError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FFileNotFoundError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FFileNotFoundError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FInterruptedError():
@@ -1944,17 +1854,17 @@ def test_1_FInterruptedError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FInterruptedError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FInterruptedError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FInterruptedError" in str(excinfo.value)
 
 
 def test_1_1_FInterruptedError():
@@ -1963,17 +1873,15 @@ def test_1_1_FInterruptedError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FInterruptedError(message_args=exc_args,
-                                tb_limit=None,
-                                tb_remove_name='test_1_1_FInterruptedError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FInterruptedError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FInterruptedError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FIsADirectoryError():
@@ -1982,17 +1890,17 @@ def test_1_FIsADirectoryError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FIsADirectoryError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FIsADirectoryError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FIsADirectoryError" in str(excinfo.value)
 
 
 def test_1_1_FIsADirectoryError():
@@ -2001,17 +1909,15 @@ def test_1_1_FIsADirectoryError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FIsADirectoryError(message_args=exc_args,
-                                 tb_limit=None,
-                                 tb_remove_name='test_1_1_FIsADirectoryError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FIsADirectoryError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FIsADirectoryError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FNotADirectoryError():
@@ -2020,17 +1926,17 @@ def test_1_FNotADirectoryError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FNotADirectoryError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FNotADirectoryError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FNotADirectoryError" in str(excinfo.value)
 
 
 def test_1_1_FNotADirectoryError():
@@ -2039,17 +1945,15 @@ def test_1_1_FNotADirectoryError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FNotADirectoryError(message_args=exc_args,
-                                  tb_limit=None,
-                                  tb_remove_name='test_1_1_FNotADirectoryError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FNotADirectoryError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FNotADirectoryError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FPermissionError():
@@ -2058,17 +1962,17 @@ def test_1_FPermissionError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FPermissionError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FPermissionError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FPermissionError" in str(excinfo.value)
 
 
 def test_1_1_FPermissionError():
@@ -2077,17 +1981,15 @@ def test_1_1_FPermissionError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FPermissionError(message_args=exc_args,
-                               tb_limit=None,
-                               tb_remove_name='test_1_1_FPermissionError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FPermissionError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FPermissionError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FProcessLookupError():
@@ -2096,17 +1998,17 @@ def test_1_FProcessLookupError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FProcessLookupError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FProcessLookupError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FProcessLookupError" in str(excinfo.value)
 
 
 def test_1_1_FProcessLookupError():
@@ -2115,17 +2017,15 @@ def test_1_1_FProcessLookupError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FProcessLookupError(message_args=exc_args,
-                                  tb_limit=None,
-                                  tb_remove_name='test_1_1_FProcessLookupError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FProcessLookupError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FProcessLookupError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FTimeoutError():
@@ -2134,17 +2034,17 @@ def test_1_FTimeoutError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FTimeoutError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FTimeoutError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FTimeoutError" in str(excinfo.value)
 
 
 def test_1_1_FTimeoutError():
@@ -2153,17 +2053,15 @@ def test_1_1_FTimeoutError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FTimeoutError(message_args=exc_args,
-                            tb_limit=None,
-                            tb_remove_name='test_1_1_FTimeoutError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FTimeoutError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FTimeoutError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FWarning():
@@ -2172,17 +2070,17 @@ def test_1_FWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FWarning(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FWarning' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FWarning" in str(excinfo.value)
 
 
 def test_1_1_FWarning():
@@ -2191,17 +2089,15 @@ def test_1_1_FWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FWarning(message_args=exc_args,
-                       tb_limit=None,
-                       tb_remove_name='test_1_1_FWarning')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FWarning(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FWarning")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FUserWarning():
@@ -2210,17 +2106,17 @@ def test_1_FUserWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FUserWarning(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FUserWarning' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FUserWarning" in str(excinfo.value)
 
 
 def test_1_1_FUserWarning():
@@ -2229,17 +2125,15 @@ def test_1_1_FUserWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FUserWarning(message_args=exc_args,
-                           tb_limit=None,
-                           tb_remove_name='test_1_1_FUserWarning')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FUserWarning(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FUserWarning")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FDeprecationWarning():
@@ -2248,17 +2142,17 @@ def test_1_FDeprecationWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FDeprecationWarning(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FDeprecationWarning' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FDeprecationWarning" in str(excinfo.value)
 
 
 def test_1_1_FDeprecationWarning():
@@ -2267,17 +2161,15 @@ def test_1_1_FDeprecationWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FDeprecationWarning(message_args=exc_args,
-                                  tb_limit=None,
-                                  tb_remove_name='test_1_1_FDeprecationWarning')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FDeprecationWarning(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FDeprecationWarning")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FPendingDeprecationWarning():
@@ -2286,17 +2178,17 @@ def test_1_FPendingDeprecationWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FPendingDeprecationWarning(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FPendingDeprecationWarning' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FPendingDeprecationWarning" in str(excinfo.value)
 
 
 def test_1_1_FPendingDeprecationWarning():
@@ -2305,17 +2197,17 @@ def test_1_1_FPendingDeprecationWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FPendingDeprecationWarning(message_args=exc_args,
-                                         tb_limit=None,
-                                         tb_remove_name='test_1_1_FPendingDeprecationWarning')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FPendingDeprecationWarning(
+            message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FPendingDeprecationWarning"
+        )
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FSyntaxWarning():
@@ -2324,17 +2216,17 @@ def test_1_FSyntaxWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FSyntaxWarning(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FSyntaxWarning' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FSyntaxWarning" in str(excinfo.value)
 
 
 def test_1_1_FSyntaxWarning():
@@ -2343,17 +2235,15 @@ def test_1_1_FSyntaxWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FSyntaxWarning(message_args=exc_args,
-                             tb_limit=None,
-                             tb_remove_name='test_1_1_FSyntaxWarning')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FSyntaxWarning(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FSyntaxWarning")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FRuntimeWarning():
@@ -2362,17 +2252,17 @@ def test_1_FRuntimeWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FRuntimeWarning(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FRuntimeWarning' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FRuntimeWarning" in str(excinfo.value)
 
 
 def test_1_1_FRuntimeWarning():
@@ -2381,17 +2271,15 @@ def test_1_1_FRuntimeWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FRuntimeWarning(message_args=exc_args,
-                              tb_limit=None,
-                              tb_remove_name='test_1_1_FRuntimeWarning')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FRuntimeWarning(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FRuntimeWarning")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FFutureWarning():
@@ -2400,17 +2288,17 @@ def test_1_FFutureWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FFutureWarning(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FFutureWarning' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FFutureWarning" in str(excinfo.value)
 
 
 def test_1_1_FFutureWarning():
@@ -2419,17 +2307,15 @@ def test_1_1_FFutureWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FFutureWarning(message_args=exc_args,
-                             tb_limit=None,
-                             tb_remove_name='test_1_1_FFutureWarning')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FFutureWarning(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FFutureWarning")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FImportWarning():
@@ -2438,17 +2324,17 @@ def test_1_FImportWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FImportWarning(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FImportWarning' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FImportWarning" in str(excinfo.value)
 
 
 def test_1_1_FImportWarning():
@@ -2457,17 +2343,15 @@ def test_1_1_FImportWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FImportWarning(message_args=exc_args,
-                             tb_limit=None,
-                             tb_remove_name='test_1_1_FImportWarning')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FImportWarning(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FImportWarning")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FUnicodeWarning():
@@ -2476,17 +2360,17 @@ def test_1_FUnicodeWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FUnicodeWarning(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FUnicodeWarning' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FUnicodeWarning" in str(excinfo.value)
 
 
 def test_1_1_FUnicodeWarning():
@@ -2495,17 +2379,15 @@ def test_1_1_FUnicodeWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FUnicodeWarning(message_args=exc_args,
-                              tb_limit=None,
-                              tb_remove_name='test_1_1_FUnicodeWarning')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FUnicodeWarning(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FUnicodeWarning")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FEncodingWarning():
@@ -2514,17 +2396,17 @@ def test_1_FEncodingWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FEncodingWarning(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FEncodingWarning' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FEncodingWarning" in str(excinfo.value)
 
 
 def test_1_1_FEncodingWarning():
@@ -2533,17 +2415,15 @@ def test_1_1_FEncodingWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FEncodingWarning(message_args=exc_args,
-                               tb_limit=None,
-                               tb_remove_name='test_1_1_FEncodingWarning')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FEncodingWarning(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FEncodingWarning")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FBytesWarning():
@@ -2552,17 +2432,17 @@ def test_1_FBytesWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FBytesWarning(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FBytesWarning' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FBytesWarning" in str(excinfo.value)
 
 
 def test_1_1_FBytesWarning():
@@ -2571,17 +2451,15 @@ def test_1_1_FBytesWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FBytesWarning(message_args=exc_args,
-                            tb_limit=None,
-                            tb_remove_name='test_1_1_FBytesWarning')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FBytesWarning(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FBytesWarning")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FResourceWarning():
@@ -2590,17 +2468,17 @@ def test_1_FResourceWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FResourceWarning(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FResourceWarning' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FResourceWarning" in str(excinfo.value)
 
 
 def test_1_1_FResourceWarning():
@@ -2609,17 +2487,15 @@ def test_1_1_FResourceWarning():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FResourceWarning(message_args=exc_args,
-                               tb_limit=None,
-                               tb_remove_name='test_1_1_FResourceWarning')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FResourceWarning(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FResourceWarning")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_FCustomException():
@@ -2628,18 +2504,18 @@ def test_1_FCustomException():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'custom_type': MySampleException,
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "custom_type": MySampleException,
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FCustomException(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: MySampleException' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: MySampleException" in str(excinfo.value)
 
 
 def test_1_1_FCustomException():
@@ -2648,19 +2524,17 @@ def test_1_1_FCustomException():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'custom_type': MySampleException,
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "custom_type": MySampleException,
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FCustomException(message_args=exc_args,
-                               tb_limit=None,
-                               tb_remove_name='test_1_1_FCustomException')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
-    assert 'Exception: MySampleException' in str(excinfo.value)
+        raise FCustomException(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FCustomException")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
+    assert "Exception: MySampleException" in str(excinfo.value)
 
 
 def test_1_2_FCustomException():
@@ -2669,18 +2543,18 @@ def test_1_2_FCustomException():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'custom_type': MySampleException,
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "custom_type": MySampleException,
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise MySampleException(FCustomException(message_args=exc_args))
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: MySampleException' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: MySampleException" in str(excinfo.value)
 
 
 def test_1_3_FCustomException():
@@ -2688,18 +2562,18 @@ def test_1_3_FCustomException():
     Tests formatting a custom type exception to print.
     """
     exc_args = {
-        'main_message': 'Problem with the construction project.',
-        'custom_type': MySampleException,
-        'expected_result': 'A door',
-        'returned_result': 'A window',
-        'suggested_resolution': 'Call contractor',
+        "main_message": "Problem with the construction project.",
+        "custom_type": MySampleException,
+        "expected_result": "A door",
+        "returned_result": "A window",
+        "suggested_resolution": "Call contractor",
     }
     my_exc = MySampleException(FCustomException(message_args=exc_args))
-    assert 'Problem with the construction project.' in str(my_exc)
-    assert 'A door' in str(my_exc)
-    assert 'A window' in str(my_exc)
-    assert 'Call contractor' in str(my_exc)
-    assert 'Exception: MySampleException' in str(my_exc)
+    assert "Problem with the construction project." in str(my_exc)
+    assert "A door" in str(my_exc)
+    assert "A window" in str(my_exc)
+    assert "Call contractor" in str(my_exc)
+    assert "Exception: MySampleException" in str(my_exc)
 
 
 def test_1_4_FCustomException():
@@ -2707,18 +2581,18 @@ def test_1_4_FCustomException():
     Tests formatting a custom type exception to print.
     """
     exc_args = {
-        'main_message': 'Problem with the construction project.',
-        'custom_type': MySampleException,
-        'expected_result': 'A door',
-        'returned_result': 'A window',
-        'suggested_resolution': 'Call contractor',
+        "main_message": "Problem with the construction project.",
+        "custom_type": MySampleException,
+        "expected_result": "A door",
+        "returned_result": "A window",
+        "suggested_resolution": "Call contractor",
     }
     my_exc = FCustomException(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(my_exc)
-    assert 'A door' in str(my_exc)
-    assert 'A window' in str(my_exc)
-    assert 'Call contractor' in str(my_exc)
-    assert 'Exception: MySampleException' in str(my_exc)
+    assert "Problem with the construction project." in str(my_exc)
+    assert "A door" in str(my_exc)
+    assert "A window" in str(my_exc)
+    assert "Call contractor" in str(my_exc)
+    assert "Exception: MySampleException" in str(my_exc)
 
 
 def test_1_FGeneralError():
@@ -2727,19 +2601,19 @@ def test_1_FGeneralError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FGeneralError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FGeneralError' in str(excinfo.value)
-    assert 'Module: test_fexceptions' in str(excinfo.value)
-    assert 'Name: test_1_FGeneralError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FGeneralError" in str(excinfo.value)
+    assert "Module: test_fexceptions" in str(excinfo.value)
+    assert "Name: test_1_FGeneralError" in str(excinfo.value)
 
 
 def test_1_1_FGeneralError():
@@ -2748,17 +2622,15 @@ def test_1_1_FGeneralError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FGeneralError(message_args=exc_args,
-                            tb_limit=None,
-                            tb_remove_name='test_1_1_FGeneralError')
-    assert 'Module: python' in str(excinfo.value)
-    assert 'Name: pytest_pyfunc_call' in str(excinfo.value)
-    assert 'Line: 192' in str(excinfo.value)
+        raise FGeneralError(message_args=exc_args, tb_limit=None, tb_remove_name="test_1_1_FGeneralError")
+    assert "Module: python" in str(excinfo.value)
+    assert "Name: pytest_pyfunc_call" in str(excinfo.value)
+    assert "Line: 192" in str(excinfo.value)
 
 
 def test_1_2_FGeneralError():
@@ -2767,19 +2639,19 @@ def test_1_2_FGeneralError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': ['A door'],
-            'returned_result': ['A window'],
-            'suggested_resolution': ['Call contractor'],
+            "main_message": "Problem with the construction project.",
+            "expected_result": ["A door"],
+            "returned_result": ["A window"],
+            "suggested_resolution": ["Call contractor"],
         }
         raise FGeneralError(message_args=exc_args)
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FGeneralError' in str(excinfo.value)
-    assert 'Module: test_fexceptions' in str(excinfo.value)
-    assert 'Name: test_1_2_FGeneralError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FGeneralError" in str(excinfo.value)
+    assert "Module: test_fexceptions" in str(excinfo.value)
+    assert "Name: test_1_2_FGeneralError" in str(excinfo.value)
 
 
 def test_1_3_FGeneralError():
@@ -2788,17 +2660,17 @@ def test_1_3_FGeneralError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
         raise FGeneralError(message_args=exc_args)
-    assert 'A door' in str(excinfo.value)
-    assert 'A window' in str(excinfo.value)
-    assert 'Call contractor' in str(excinfo.value)
-    assert 'Exception: FGeneralError' in str(excinfo.value)
-    assert 'Module: test_fexceptions' in str(excinfo.value)
-    assert 'Name: test_1_3_FGeneralError' in str(excinfo.value)
+    assert "A door" in str(excinfo.value)
+    assert "A window" in str(excinfo.value)
+    assert "Call contractor" in str(excinfo.value)
+    assert "Exception: FGeneralError" in str(excinfo.value)
+    assert "Module: test_fexceptions" in str(excinfo.value)
+    assert "Name: test_1_3_FGeneralError" in str(excinfo.value)
 
 
 def test_1_4_FGeneralError():
@@ -2807,23 +2679,22 @@ def test_1_4_FGeneralError():
 
     This tests make sure the local __init__ is skipped.
     """
-    class MyTest():
+
+    class MyTest:
         def __init__(self) -> None:
             exc_args = {
-                'main_message': 'Problem with the construction project.',
-                'expected_result': 'A door',
-                'returned_result': 'A window',
-                'suggested_resolution': 'Call contractor',
+                "main_message": "Problem with the construction project.",
+                "expected_result": "A door",
+                "returned_result": "A window",
+                "suggested_resolution": "Call contractor",
             }
-            raise FGeneralError(message_args=exc_args,
-                                tb_limit=None,
-                                tb_remove_name='__init__')
+            raise FGeneralError(message_args=exc_args, tb_limit=None, tb_remove_name="__init__")
 
     with pytest.raises(Exception) as excinfo:
         MyTest()
-    assert 'Problem with the construction project.' in str(excinfo.value)
-    assert 'Module: test_fexceptions' in str(excinfo.value)
-    assert 'Name: test_1_4_FGeneralError' in str(excinfo.value)
+    assert "Problem with the construction project." in str(excinfo.value)
+    assert "Module: test_fexceptions" in str(excinfo.value)
+    assert "Name: test_1_4_FGeneralError" in str(excinfo.value)
 
 
 def test_1_nested_override():
@@ -2838,45 +2709,36 @@ def test_1_nested_override():
     try:
         nested_override()
     except Exception as exc:
-        assert 'Exception: FTypeError' in str(exc)
-        assert 'Module: test_fexceptions' in str(exc)
-        assert 'Name: test_1_nested_override' in str(exc)
+        assert "Exception: FTypeError" in str(exc)
+        assert "Module: test_fexceptions" in str(exc)
+        assert "Name: test_1_nested_override" in str(exc)
 
         # Checks that Trace Details returns.
         try:
-            exc_args = {
-                'main_message': 'Problem with the construction project.',
-                'original_exception': exc
-            }
+            exc_args = {"main_message": "Problem with the construction project.", "original_exception": exc}
             raise FTypeError(message_args=exc_args)
         except Exception as exc1:
-            assert 'Problem with the construction project.' in str(exc1)
-            assert '- Name:' in str(exc1).split('\n')[-5]
-            assert '- Line:' in str(exc1).split('\n')[-4]
+            assert "Problem with the construction project." in str(exc1)
+            assert "- Name:" in str(exc1).split("\n")[-5]
+            assert "- Line:" in str(exc1).split("\n")[-4]
 
         # Checks that Trace Details returns.
         try:
-            exc_args = {
-                'main_message': 'Problem with the construction project.',
-                'original_exception': exc
-            }
+            exc_args = {"main_message": "Problem with the construction project.", "original_exception": exc}
             raise FTypeError(exc_args, tb_limit=2)
         except Exception as exc1:
-            assert 'Problem with the construction project.' in str(exc1)
-            assert '- Name:' in str(exc1).split('\n')[-5]
-            assert '- Line:' in str(exc1).split('\n')[-4]
+            assert "Problem with the construction project." in str(exc1)
+            assert "- Name:" in str(exc1).split("\n")[-5]
+            assert "- Line:" in str(exc1).split("\n")[-4]
 
         # Checks that Trace Details does not return.
         try:
-            exc_args = {
-                'main_message': 'Problem with the construction project.',
-                'original_exception': exc
-            }
+            exc_args = {"main_message": "Problem with the construction project.", "original_exception": exc}
             raise FTypeError(exc_args, tb_limit=0)
         except Exception as exc2:
-            assert 'Problem with the construction project.' in str(exc2)
-            assert '- Name:' not in str(exc2).split('\n')[-5]
-            assert '- Line:' not in str(exc2).split('\n')[-4]
+            assert "Problem with the construction project." in str(exc2)
+            assert "- Name:" not in str(exc2).split("\n")[-5]
+            assert "- Line:" not in str(exc2).split("\n")[-4]
 
 
 def test_1_1_nested_no_override():
@@ -2885,9 +2747,9 @@ def test_1_1_nested_no_override():
     """
     with pytest.raises(Exception) as excinfo:
         nested_no_override()
-    assert 'Exception: FTypeError' in str(excinfo.value)
-    assert 'Module: nested' in str(excinfo.value)
-    assert 'Name: nested_no_override' in str(excinfo.value)
+    assert "Exception: FTypeError" in str(excinfo.value)
+    assert "Module: nested" in str(excinfo.value)
+    assert "Name: nested_no_override" in str(excinfo.value)
 
 
 def test_1_1_nested_no_format():
@@ -2899,19 +2761,16 @@ def test_1_1_nested_no_format():
     try:
         nested_no_format()
     except Exception as exc:
-        assert 'Sample no format with the nested module' in str(exc)
+        assert "Sample no format with the nested module" in str(exc)
 
         # Checks that Trace Details returns.
         try:
-            exc_args = {
-                'main_message': 'Problem with the construction project.',
-                'original_exception': exc
-            }
+            exc_args = {"main_message": "Problem with the construction project.", "original_exception": exc}
             raise FTypeError(message_args=exc_args)
         except Exception as exc1:
-            assert 'Problem with the construction project.' in str(exc1)
-            assert 'Nested Exception:' in str(exc1)
-            assert 'Sample no format with the nested module' in str(exc1)
+            assert "Problem with the construction project." in str(exc1)
+            assert "Nested Exception:" in str(exc1)
+            assert "Sample no format with the nested module" in str(exc1)
 
 
 def test_1_1_nested_custom_exception():
@@ -2923,19 +2782,19 @@ def test_1_1_nested_custom_exception():
     try:
         nested_custom_exception()
     except Exception as exc:
-        assert 'Sample problem with the nested module.' in str(exc)
+        assert "Sample problem with the nested module." in str(exc)
 
         try:
             exc_args = {
-                'main_message': 'More problems with the construction project discussed.',
-                'custom_type': MySampleException,
-                'original_exception': exc
+                "main_message": "More problems with the construction project discussed.",
+                "custom_type": MySampleException,
+                "original_exception": exc,
             }
             raise MySampleException(FCustomException(message_args=exc_args))
         except Exception as exc1:
-            assert 'More problems with the construction project discussed.' in str(exc1)
-            assert 'Nested Exception:' in str(exc1)
-            assert 'Name: nested_custom_exception' in str(exc1)
+            assert "More problems with the construction project discussed." in str(exc1)
+            assert "Nested Exception:" in str(exc1)
+            assert "Name: nested_custom_exception" in str(exc1)
 
 
 def test_1_1_nested_nested_custom_exception():
@@ -2947,17 +2806,18 @@ def test_1_1_nested_nested_custom_exception():
     try:
         nested_nested_custom_exception()
     except Exception as exc:
-        assert 'Sample problem with the nested module in nested module.' in str(exc)
+        assert "Sample problem with the nested module in nested module." in str(exc)
 
         try:
             exc_args = {
-                'main_message': 'More and more problems with the construction project discussed.',
-                'custom_type': MySampleException,
-                'original_exception': exc
+                "main_message": "More and more problems with the construction project discussed.",
+                "custom_type": MySampleException,
+                "original_exception": exc,
             }
             raise MySampleException(FCustomException(message_args=exc_args))
         except Exception as exc1:
-            assert 'nested_nested_custom_exception' in str(exc1)
+            assert "nested_nested_custom_exception" in str(exc1)
+
 
 # ############################################################
 # ######Section Test Part 2 (Error/Catch Value Checking)######
@@ -2972,10 +2832,10 @@ def test_2_FGeneralError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'bad_key': 'Problem with the construction project.',
+            "bad_key": "Problem with the construction project.",
         }
         raise FGeneralError(message_args=exc_args)
-    assert 'does not match any expected match option key' in str(excinfo.value)
+    assert "does not match any expected match option key" in str(excinfo.value)
 
 
 def test_2_1_FGeneralError():
@@ -2983,10 +2843,9 @@ def test_2_1_FGeneralError():
     Tests no keys.
     """
     with pytest.raises(Exception) as excinfo:
-        exc_args = {
-        }
+        exc_args = {}
         raise FGeneralError(message_args=exc_args)
-    assert 'No key(s) were sent.' in str(excinfo.value)
+    assert "No key(s) were sent." in str(excinfo.value)
 
 
 def test_2_2_FGeneralError():
@@ -2994,9 +2853,11 @@ def test_2_2_FGeneralError():
     Tests sending a single line string.
     """
     with pytest.raises(Exception) as excinfo:
-        raise FGeneralError(message_args='Single Line Exception')
-    assert ('Dictionary format is the required input to format an exception message. '
-            'Single line messages should use the built-in Python exceptions') in str(excinfo.value)
+        raise FGeneralError(message_args="Single Line Exception")
+    assert (
+        "Dictionary format is the required input to format an exception message. "
+        "Single line messages should use the built-in Python exceptions"
+    ) in str(excinfo.value)
 
 
 def test_2_3_FGeneralError():
@@ -3005,13 +2866,13 @@ def test_2_3_FGeneralError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FGeneralError(message_args=exc_args, tb_limit={'invalid Type'})
-    assert 'int format is the required input to set the traceback limit option.' in str(excinfo.value)
+        raise FGeneralError(message_args=exc_args, tb_limit={"invalid Type"})
+    assert "int format is the required input to set the traceback limit option." in str(excinfo.value)
 
 
 def test_2_4_FGeneralError():
@@ -3020,12 +2881,12 @@ def test_2_4_FGeneralError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FGeneralError(message_args=exc_args, tb_limit=None, tb_remove_name={'invalid Type'})
+        raise FGeneralError(message_args=exc_args, tb_limit=None, tb_remove_name={"invalid Type"})
     assert """Invalid tb_remove_name type.""" in str(excinfo.value)
     assert """<class 'str'>""" in str(excinfo.value)
     assert """<class 'set'>""" in str(excinfo.value)
@@ -3037,13 +2898,15 @@ def test_2_5_FGeneralError():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'Problem with the construction project.',
-            'expected_result': 'A door',
-            'returned_result': 'A window',
-            'suggested_resolution': 'Call contractor',
+            "main_message": "Problem with the construction project.",
+            "expected_result": "A door",
+            "returned_result": "A window",
+            "suggested_resolution": "Call contractor",
         }
-        raise FGeneralError(message_args=exc_args, tb_limit=None, tb_remove_name='invalid_func')
-    assert """The function or method name did not match any co_name in the inspect.currentframe().""" in str(excinfo.value)
+        raise FGeneralError(message_args=exc_args, tb_limit=None, tb_remove_name="invalid_func")
+    assert """The function or method name did not match any co_name in the inspect.currentframe().""" in str(
+        excinfo.value
+    )
     assert """'invalid_func' matching co_name""" in str(excinfo.value)
     assert """Module: python""" in str(excinfo.value)
     assert """Name: pytest_pyfunc_call""" in str(excinfo.value)
@@ -3056,8 +2919,8 @@ def test_2_FCustomException():
     """
     with pytest.raises(Exception) as excinfo:
         exc_args = {
-            'main_message': 'This is my test error message.',
-            'custom_type': 'BAD VALUE ERROR',
+            "main_message": "This is my test error message.",
+            "custom_type": "BAD VALUE ERROR",
         }
         raise MySampleException(FCustomException(message_args=exc_args))
-    assert 'A pre-configured exception' in str(excinfo.value)
+    assert "A pre-configured exception" in str(excinfo.value)
