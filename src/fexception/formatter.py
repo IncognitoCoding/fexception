@@ -9,7 +9,7 @@ __author__ = "IncognitoCoding"
 __copyright__ = "Copyright 2022, formatter"
 __credits__ = ["IncognitoCoding"]
 __license__ = "MIT"
-__version__ = "0.3.11"
+__version__ = "0.3.12"
 __maintainer__ = "IncognitoCoding"
 __status__ = "Beta"
 
@@ -143,14 +143,20 @@ def exception_formatter(processed_message_args: ProcessedMessageArgs, exception_
                     f"  - Traceback Lines: {tb_sections}\nExiting...."
                 )  # pragma: no cover
 
+            # Gets the tb reason.
             tb_reason = tb_sections[-1]
-            # This pulls the exception name and exception value.
-            # Replace Example:
-            #   Original: NameError: name 'x' is not defined
-            #   Replaced: split_tb_reason[0] = NameError
-            #             split_tb_reason[1] = name 'x' is not defined
-            split_tb_reason = tb_reason.split(": ")
-            exception_msg = split_tb_reason[1]
+
+            # Removes the exception from the message if one exists.
+            if "Error:" in tb_reason:
+                # This pulls the exception name and exception value.
+                # Replace Example:
+                #   Original: NameError: name 'x' is not defined
+                #   Replaced: split_tb_reason[0] = NameError
+                #             split_tb_reason[1] = name 'x' is not defined
+                split_tb_reason = tb_reason.split(": ")
+                tb_reason = split_tb_reason[1]
+
+            exception_msg = tb_reason
             formatted_original_exception: str = str(
                 "\n            " + "\n            ".join(map(str, str(exception_msg).splitlines()))
             )
